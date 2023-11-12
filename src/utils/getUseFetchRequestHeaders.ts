@@ -1,4 +1,5 @@
-import type { UseFetchArgs, UseFetchTriggerArgs, RequestHeaders } from '../types/useFetch'
+import type { UseFetchArgs, UseFetchTriggerArgs } from '../types/useFetch'
+import type { RequestHeaders } from '../types/http'
 
 export const getUseFetchRequestHeaders = (
   baseHeaders: UseFetchTriggerArgs<any, any>['headers'],

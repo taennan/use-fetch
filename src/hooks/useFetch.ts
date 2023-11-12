@@ -1,16 +1,10 @@
-import type {
-  FetcherFn,
-  UseFetchArgs,
-  UseFetchReturn,
-  UseFetchTriggerFn,
-  RequestParams,
-  RequestBody,
-} from '../types/useFetch'
+import type { FetcherFn, UseFetchArgs, UseFetchReturn, UseFetchTriggerFn } from '../types/useFetch'
+import type { RequestBody, RequestParams } from '../types/http'
 
 import { useState, useEffect, useRef } from 'react'
-import { getRequestUrl } from '../utils/getRequestUrl'
 import { getUseFetchRequestBody } from '../utils/getUseFetchRequestBody'
 import { getUseFetchRequestHeaders } from '../utils/getUseFetchRequestHeaders'
+import { getUseFetchRequestUrl } from '../utils/getUseFetchRequestUrl'
 import { getUseFetchResultFromResponse } from '../utils/getUseFetchResultFromResponse'
 import { getUseFetchUrlParams } from '../utils/getUseFetchUrlParams'
 
@@ -24,6 +18,7 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
     resultType,
     initialData,
     triggerOnLoad,
+    triggerOnUrlChange,
     triggerOnParamChange,
     triggerOnBodyChange,
     transformRequestParams,
@@ -36,6 +31,7 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
     method: 'GET',
     resultType: 'infer',
     triggerOnLoad: true,
+    triggerOnUrlChange: true,
     triggerOnParamChange: true,
     triggerOnBodyChange: true,
     ...baseArgs,
@@ -51,7 +47,7 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
   const [loading, setLoading] = useState(false)
   const [fetched, setFetched] = useState(false)
 
-  const fetcher: FetcherFn<Params, Body, Result> = async (args) => {
+  const fetcher: FetcherFn<Result> = async (args) => {
     const { fetcher: baseFetcher } = baseArgs
     if (baseFetcher) return baseFetcher(args)
 
@@ -71,7 +67,7 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
       triggerArgs.params,
       transformRequestParams,
     )
-    const url = getRequestUrl(baseArgs.url, params)
+    const url = getUseFetchRequestUrl(baseArgs.url, triggerArgs.url, params)
     const body = getUseFetchRequestBody(baseArgs.body, triggerArgs.body, transformRequestBody)
     const headers = getUseFetchRequestHeaders(
       baseArgs.headers,
@@ -110,6 +106,11 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
     if (triggerOnLoad) trigger()
     initedRef.current = true
   }, [])
+
+  useEffect(() => {
+    if (!triggerOnUrlChange || !initedRef.current) return
+    trigger()
+  }, [baseArgs.url])
 
   useEffect(() => {
     if (!triggerOnParamChange || !initedRef.current) return

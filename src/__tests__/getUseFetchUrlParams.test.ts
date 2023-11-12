@@ -15,7 +15,10 @@ describe('getUseFetchUrlParams', () => {
   it('accepts functions as args', () => {
     const expected0 = { a: 10 }
     const expected1 = { a: 10, b: 24 }
-    const actual = getUseFetchUrlParams(() => expected0, () => expected1)
+    const actual = getUseFetchUrlParams(
+      () => expected0,
+      () => expected1,
+    )
 
     expect(actual).toEqual({
       ...expected0,

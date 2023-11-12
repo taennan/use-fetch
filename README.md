@@ -1,14 +1,18 @@
 # Use Fetch
 
+_Yet another hook in your_ [`@helpful-hooks`](npm-helpful-hooks) _toolbox!_
+
+The `@helpful-hooks/use-fetch` package is designed to be a lightweight, flexible and extensible solution for making fetch requests and api calls
+
+It follows a similar design to [rtk-query](npm-rtk-query), but allows for __easy__ and __complete__ customization over the raw requests and responses, when requests are sent, whether they are sent at all, and how urls, request and response payloads are processed before being sent on their way.
+
+Excited by the possibilities? Read on to find out more!
+
 ## Contents
 
 - [Installation](#installation)
-- [Usage](#usage)
-  - [Basic Example](#basic-example)
-  - [Basic Options](#basic-options)
-  - [Return Value](#return-value)
-  - [Manually Trigger a Request](#manually-trigger-a-request)
-  - [Advanced Options](#advanced-options)
+- [Basic Usage](#basic-usage)
+- [In-Depth Usage](#in-depth-usage)
 - [Licence](#licence)
 - [Contributing](#contributing)
 
@@ -26,200 +30,119 @@ With `npm`
 npm install @helpful-hooks/use-fetch
 ```
 
-## Usage
+## Basic Usage
 
-### Basic Example
+The `useFetch` hook is filled with many useful features to help with api calls. Below is the basic gist of how `useFetch` is meant to be used in a React app which displays a list of Todos from an api. 
 
-The following shows how `useFetch` can be used in a component that renders data for a hypothetical user queried from an API
+However, as there are too many uses and techniques to cleany demonstrate in a single README, please see the [In-Depth Usage](#in-depth-usage) section for links to further documentation
+
+#### api.ts
 
 ```ts
 import { useFetch } from '@helpful-hooks/use-fetch'
-import { useState } from 'react'
 
-const MyComponent = () => {
-  const [userId, setUserId] = useState(0)
-
-  // When triggered, will send a GET request with the url: 
-  // http://my.api/example?id=<userId>
-  const query = useFetch<User>({
-    url: 'http://my.api/example',
-    params: {
-      id: userId,
-    },
-  })
-
-  return (
-    <>
-      {query.loading ? 'Loading...' : null}
-      {query.error ? 'An error occurred' : null}
-      {query.data ? (
-        <p>Found User</p>
-        <p>Id: {query.data.id}</p>
-        <p>Name: {query.data.name}</p>
-      ) : null}
-    </>
-  )
+// Database Types
+interface Todo {
+    id: number
+    name: string
+    completed: boolean
 }
+
+interface SearchTodosParams {
+    id?: number
+    name?: string
+    completed?: boolean
+}
+
+interface CreateTodoBody {
+    name: string
+}
+
+// useFetch can be used directly in a component, but is far cleaner and DRYer when abstracted over in a custom hook
+export const useSearchTodosQuery = (params: Partial<Todo>) => 
+    useFetch<Todo[], SearchTodosParams, never>({
+        url: 'https://my-api.com/todos',
+        params,
+    })
+
+export const useCreateTodoQuery = () => 
+    useFetch<Todo, never, CreateTodoBody | undefined>({
+        url: 'https://my-api.com/todos',
+        method: 'POST',
+        triggerOnLoad: false,
+    })
 ```
 
-### Basic Options
+#### Todos.tsx
 
-The only option required for `useFetch` is the base `url` used in the request. 
+```tsx
+import { useSearchTodosQuery, useCreateTodoQuery } from './api'
 
-All other options are used for customizing the url params, body, headers, etc.
+export const Todos = () => {
+    const searchTodosQuery = useSearchTodosQuery({ completed: true })
+    const createTodoQuery = useCreateTodoQuery()
 
-Here are some of the more common options that can be used
-
-```ts
-const query = useFetch({
-  // - The base url (Required)
-  url: 'http://my.api/example',
-
-  // - HTTP method ('get' by default)
-  method: 'get'
-
-  // - Determines whether response bodies are parsed as json or text ('json' by default)
-  // - Can be one of 'json' or 'text'
-  resultType: 'json'
-
-  // - Query params to append to the url
-  // - Can be an object or function which returns an object
-  // - Will automatically be converted to a string of url params
-  params: {
-    a: 10,
-    b: '20'
-  },
-
-  // - Body sent with the Request
-  // - Can be an object or function which returns an object
-  // - Will have no effect if making a GET or HEAD request
-  body: {
-    guid: 'gid://...'
-  },
-
-  // - Headers sent with the request
-  // - Can be an object or function which returns an object
-  headers: () => ({
-    accessToken: '...'
-  }),
-
-  // - Whether a request is sent on initial render (true by default)
-  triggerOnLoad: true
-  // - Whether a request is sent when `params` option has changed (true by default)
-  triggerOnParamChange: true
-  // - Whether a request is sent when `body` option has changed (true by default)
-  // - Will have no effect if making a GET or HEAD request
-  triggerOnBodyChange: true
-})
-```
-
-### Return Value
-
-```ts
-const {
-  // - Data returned from request
-  // - Is undefined on error or before a request is made
-  data,
-  // - True if awaiting response from api call
-  loading,
-  // - True if at least one request has been made
-  fetched,
-  // - Error returned from unsuccsessful request
-  error,
-  // - A function which can be used to manually send a request
-  trigger,
-} = useFetch(options)
-```
-
-### Manually Trigger a Request
-
-Use the `trigger` function returned from the `useFetch` hook to manually send a request
-
-Here is a basic example of how `trigger` can be used to send a POST request when creating a hypothetical user
-
-```ts
-const createUserQuery = useFetch<User>({
-  url: '...',
-  method: 'POST',
-  triggerOnLoad: false,
-})
-
-const [email, setEmail] = useState('')
-const [password, setPassword] = useState('')
-
-const createUser = async () => {
-  const result = await createUserQuery.trigger({
-    body: {
-      email,
-      password
+    const createTodo = async (name: string) => {
+        // Creates a new Todo with specified name, 
+        // then re-runs the search query to update the list of Todo's
+        await createTodoQuery.trigger({ name })
+        await searchTodosQuery.trigger()
     }
-  })
+
+    return (
+        <>
+            <h1>Things left to do:</h1>
+            {searchTodosQuery.loading && <p>Loading...</p>}
+            {searchTodosQuery.error && <p>Could not retreive Todos</p>}
+            {searchTodosQuery.data && searchTodosQuery.data.map((todo, i) => (
+                <p>{i} - {todo.name}</p>
+            ))}
+
+            <hr />
+
+            <h1>Add something new to do:</h1>
+            <button 
+                disabled={createTodoQuery.loading}
+                onClick={() => {
+                    const todoName = getNewTodoName()
+                    createTodo(todoName)
+                }}>
+                Generate new Todo
+            </button>
+        </>
+    )
 }
-
-return (
-  <>
-    ...
-    <button onClick={createUser}>Register</button>
-  </>
-)
 ```
 
-Trigger takes an object as it's argument which can be used to configure the `body`, `params` and `headers` of the request. The options are identical to the `body`, `params` and `headers` options of the `useFetch` hook
+## In-Depth Usage
 
-```ts
-const query = useFetch(options)
+If you would like to find out about the other cool fetures provided by this hook, check out the links below to our documentation pages:
 
-// ...
-
-const result = await query.trigger({
-  params: { 
-    a: 10 
-  },
-  body: { 
-    b: '20' 
-  },
-  headers: () => ({
-    accessToken: '...'
-  }),
-})
-```
-
-Since the request `body`, `params` and `headers` can be passed through the `useFetch` hook or the `trigger` function, any conflicting fields will be overridden by the `trigger` function
-
-In the example below, running the request manually with `trigger` will result with the `a` field to be `25`, instead of the `10` specified in the `useFetch` options
-
-```ts
-const query = useFetch({
-  ...,
-  body: { a: 10 }
-})
-
-// ...
-
-// Will send request with body { a: 25 }, NOT { a: 10 }
-const result = await trigger({
-  body: { a: 25 }
-})
-```
-
-### Advanced Options
-
-```ts
-const query = useFetch({
-  ...,
-  transformRequestHeaders?: (headers?: RequestHeaders) => RequestHeaders,
-  transformRequestParams?: (params?: RequestParams) => RequestParams,
-  transformRequestBody?: (body?: RequestBody) => RequestBody,
-  transformRequest?: (request: Request) => Request,
-  transformResponse?: (response: Response) => Response,
-  transformResult?: (result: any) => any,
-})
-```
+- [Customizing requests](docs-customizing-requests)
+- [Manually triggering requests](docs-manually-triggering-requests)
+- [Common patterns](docs-common-patterns)
+- [Common pitfalls](docs-common-pitfalls)
+- [Modifying responses](docs-modifying-responses)
+- [Custom fetchers](docs-custom-fetchers)
+- [Typescript tips](docs-typescript-tips)
 
 ## Licence
 
-MIT
+This package uses the MIT licence. Feel free to use it in whatever morally correct way you'd like
 
 ## Contributing
 
-All contiributions are welcome. If you notice any bugs or have any feature request, please open an issue on our Gihub repo
+All contributions are welcome. If you notice any bugs or have any feature request or questions, please open an issue in our [Github repo](github-repo)
+
+[github-repo]: https://todo.com
+
+[docs-customizing-requests]:          https://todo.com
+[docs-manually-triggering-requests]:  https://todo.com
+[docs-common-patterns]:               https://todo.com
+[docs-common-pitfalls]:               https://todo.com
+[docs-modifying-responses]:           https://todo.com
+[docs-custom-fetchers]:               https://todo.com
+[docs-typescript-tips]:               https://todo.com
+
+[npm-helpful-hooks]: https://www.npmjs.com/search?q=%40helpful-hooks
+[npm-rtk-query]: https://www.npmjs.com/package/@reduxjs/toolkit

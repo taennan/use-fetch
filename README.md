@@ -4,7 +4,7 @@ _Yet another hook in your_ [`@helpful-hooks`](npm-helpful-hooks) _toolbox!_
 
 The `@helpful-hooks/use-fetch` package is designed to be a lightweight, flexible and extensible solution for making fetch requests and api calls
 
-It follows a similar design to [rtk-query](npm-rtk-query), but allows for __easy__ and __complete__ customization over the raw requests and responses, when requests are sent, whether they are sent at all, and how urls, request and response payloads are processed before being sent on their way.
+It follows a similar design to [rtk-query](npm-rtk-query), but allows for __easy__ and __complete__ customization over the raw requests and responses, when requests are sent, whether they are sent at all, how urls, request and response payloads are processed before being sent on their way and much more.
 
 Excited by the possibilities? Read on to find out more!
 

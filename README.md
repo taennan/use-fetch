@@ -121,7 +121,6 @@ If you would like to find out about the other cool fetures provided by this hook
 - [Customizing requests](docs-customizing-requests)
 - [Manually triggering requests](docs-manually-triggering-requests)
 - [Common patterns](docs-common-patterns)
-- [Common pitfalls](docs-common-pitfalls)
 - [Modifying responses](docs-modifying-responses)
 - [Custom fetchers](docs-custom-fetchers)
 - [Typescript tips](docs-typescript-tips)
@@ -134,15 +133,14 @@ This package uses the MIT licence. Feel free to use it in whatever morally corre
 
 All contributions are welcome. If you notice any bugs or have any feature request or questions, please open an issue in our [Github repo](github-repo)
 
-[github-repo]: https://todo.com
+[github-repo]: https://github.com/taennan/use-fetch.git
 
-[docs-customizing-requests]:          https://todo.com
-[docs-manually-triggering-requests]:  https://todo.com
-[docs-common-patterns]:               https://todo.com
-[docs-common-pitfalls]:               https://todo.com
-[docs-modifying-responses]:           https://todo.com
-[docs-custom-fetchers]:               https://todo.com
-[docs-typescript-tips]:               https://todo.com
+[docs-customizing-requests]:          https://github.com/taennan/use-fetch/blob/main/docs/customizing-reqeusts.md
+[docs-manually-triggering-requests]:  https://github.com/taennan/use-fetch/blob/main/docs/manually-triggering-requests.md
+[docs-common-patterns]:               https://github.com/taennan/use-fetch/blob/main/docs/common-patterns.md
+[docs-modifying-responses]:           https://github.com/taennan/use-fetch/blob/main/docs/modifying-responses.md
+[docs-custom-fetchers]:               https://github.com/taennan/use-fetch/blob/main/docs/custom-fetchers.md
+[docs-typescript-tips]:               https://github.com/taennan/use-fetch/blob/main/docs/typescript-tips.md
 
 [npm-helpful-hooks]: https://www.npmjs.com/search?q=%40helpful-hooks
 [npm-rtk-query]: https://www.npmjs.com/package/@reduxjs/toolkit

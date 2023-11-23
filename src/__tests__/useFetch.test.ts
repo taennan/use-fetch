@@ -34,12 +34,13 @@ describe('useFetch', () => {
     const mockError = {
       message: 'Not found',
     }
+
     fetchMock.mockResponseOnce(JSON.stringify(mockError), {
-      status: 404,
+      status: 404
     })
 
     const { result: hook, waitForNextUpdate } = renderHook(() =>
-      useFetch({ url: MOCK_URL + 'error-test' }),
+      useFetch({ url: MOCK_URL + 'error-test', errorResultType: 'json' }),
     )
 
     await waitForNextUpdate()
@@ -167,10 +168,10 @@ describe('useFetch', () => {
   it('does not trigger a fetch on change to triggerOnBodyChange', async () => {
     let triggerCount: number = 0
     let triggerOnBodyChange = false
+    const body = {}
 
-    fetchMock.mockResponse(async (req) => {
+    fetchMock.mockResponse(async () => {
       triggerCount++
-      console.log(req)
       return 'SUCCESS'
     })
 
@@ -179,7 +180,7 @@ describe('useFetch', () => {
         url: MOCK_URL + 'no-trigger-on-change-to-triggerOnBodyChange',
         resultType: 'text',
         method: 'post',
-        body: {},
+        body,
         triggerOnLoad: false,
         triggerOnBodyChange,
       }),

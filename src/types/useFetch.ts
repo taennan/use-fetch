@@ -31,6 +31,7 @@ export interface UseFetchArgs<Params extends RequestParams, Body extends Request
   url: string | FnReturns<string>
   method?: HttpMethod
   resultType?: UseFetchArgsResultType
+  errorResultType?: UseFetchArgsResultType
   initialData?: Result
   triggerOnLoad?: boolean
   triggerOnUrlChange?: boolean

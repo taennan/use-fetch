@@ -5,14 +5,7 @@ describe('getUseFetchRequestBody', () => {
     expect(getUseFetchRequestBody).toBeDefined()
   })
 
-  it('correctly merges dictionary-like args', () => {
-    const expected = { a: 20 }
-    const actual = getUseFetchRequestBody({ a: 10 }, expected)
-
-    expect(actual).toEqual(expected)
-  })
-
-  it('correctly overrides non-dictionary-like args', () => {
+  it('correctly overrides args', () => {
     type Body = string | number
 
     const expected = 'AWESOME!'
@@ -40,16 +33,12 @@ describe('getUseFetchRequestBody', () => {
   })
 
   it('accepts functions as args', () => {
-    const expected0 = { a: 10, b: '24' }
-    const expected1 = { b: '24' }
+    const expected = { b: '24' }
     const actual = getUseFetchRequestBody(
-      () => expected0,
-      () => expected1,
+      () => ({ a: 10, b: '24' }),
+      () => expected,
     )
 
-    expect(actual).toEqual({
-      ...expected0,
-      ...expected1,
-    })
+    expect(actual).toEqual(expected)
   })
 })

@@ -1,7 +1,7 @@
 import type { FetcherFn, UseFetchArgs, UseFetchReturn, UseFetchTriggerFn } from '../types/useFetch'
 import type { RequestBody, RequestParams } from '../types/http'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { getUseFetchRequestBody } from '../utils/getUseFetchRequestBody'
 import { getUseFetchRequestHeaders } from '../utils/getUseFetchRequestHeaders'
 import { getUseFetchRequestUrl } from '../utils/getUseFetchRequestUrl'
@@ -14,36 +14,28 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
   baseArgs: UseFetchArgs<Params, Body, Result>,
 ): UseFetchReturn<Result, Params, Body> => {
   const {
-    method,
-    resultType,
+    method = 'GET',
+    resultType = 'infer',
+    errorResultType = 'infer',
     initialData,
-    triggerOnLoad,
-    triggerOnUrlChange,
-    triggerOnParamChange,
-    triggerOnBodyChange,
+    triggerOnLoad = true,
+    triggerOnUrlChange = true,
+    triggerOnParamChange = true,
+    triggerOnBodyChange = true,
     transformRequestParams,
     transformRequestBody,
     transformRequestHeaders,
     transformRequest,
     transformResponse,
     transformResult,
-  } = {
-    method: 'GET',
-    resultType: 'infer',
-    triggerOnLoad: true,
-    triggerOnUrlChange: true,
-    triggerOnParamChange: true,
-    triggerOnBodyChange: true,
-    ...baseArgs,
-  } satisfies UseFetchArgs<Params, Body, Result>
+  } = baseArgs
 
   const allowBody = !NON_BODY_HTTP_METHODS.includes(method)
 
   const [data, setData] = useState<Result | undefined>(initialData)
   const [error, setError] = useState<any | undefined>()
 
-  // @TODO: Using a ref instead of state for 'inited' makes tests fail
-  const initedRef = useRef(false)
+  const [inited, setInited] = useState(false)
   const [loading, setLoading] = useState(false)
   const [fetched, setFetched] = useState(false)
 
@@ -56,7 +48,7 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
     const rawResponse = await fetch(request)
     const response = transformResponse ? transformResponse(rawResponse) : rawResponse
 
-    const result = await getUseFetchResultFromResponse(response, resultType)
+    const result = await getUseFetchResultFromResponse(response, resultType, errorResultType)
 
     return { response, result }
   }
@@ -104,21 +96,22 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
 
   useEffect(() => {
     if (triggerOnLoad) trigger()
-    initedRef.current = true
+  setInited(true)
   }, [])
 
   useEffect(() => {
-    if (!triggerOnUrlChange || !initedRef.current) return
+    if (!triggerOnUrlChange || !inited) return
     trigger()
   }, [baseArgs.url])
 
   useEffect(() => {
-    if (!triggerOnParamChange || !initedRef.current) return
+    if (!triggerOnParamChange || !inited) return
+    console.log('PARAM CHANGE!', baseArgs.params, inited)
     trigger()
   }, [baseArgs.params])
 
   useEffect(() => {
-    if (!allowBody || !triggerOnBodyChange || !initedRef.current) return
+    if (!allowBody || !triggerOnBodyChange || !inited) return
     trigger()
   }, [baseArgs.body])
 

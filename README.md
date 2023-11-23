@@ -133,9 +133,9 @@ This package uses the MIT licence. Feel free to use it in whatever morally corre
 
 All contributions are welcome. If you notice any bugs or have any feature request or questions, please open an issue in our [Github repo](github-repo)
 
-[github-repo]: https://github.com/taennan/use-fetch.git
+[github-repo]: https://github.com/taennan/use-fetch
 
-[docs-customizing-requests]:          https://github.com/taennan/use-fetch/blob/main/docs/customizing-reqeusts.md
+[docs-customizing-requests]:          https://github.com/taennan/use-fetch/blob/main/docs/common-patterns.md
 [docs-manually-triggering-requests]:  https://github.com/taennan/use-fetch/blob/main/docs/manually-triggering-requests.md
 [docs-common-patterns]:               https://github.com/taennan/use-fetch/blob/main/docs/common-patterns.md
 [docs-modifying-responses]:           https://github.com/taennan/use-fetch/blob/main/docs/modifying-responses.md

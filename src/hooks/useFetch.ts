@@ -106,7 +106,6 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
 
   useEffect(() => {
     if (!triggerOnParamChange || !inited) return
-    console.log('PARAM CHANGE!', baseArgs.params, inited)
     trigger()
   }, [baseArgs.params])
 

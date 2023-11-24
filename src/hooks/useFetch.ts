@@ -96,7 +96,7 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
 
   useEffect(() => {
     if (triggerOnLoad) trigger()
-  setInited(true)
+    setInited(true)
   }, [])
 
   useEffect(() => {

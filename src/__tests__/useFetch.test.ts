@@ -36,7 +36,7 @@ describe('useFetch', () => {
     }
 
     fetchMock.mockResponseOnce(JSON.stringify(mockError), {
-      status: 404
+      status: 404,
     })
 
     const { result: hook, waitForNextUpdate } = renderHook(() =>

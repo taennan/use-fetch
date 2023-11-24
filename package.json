@@ -20,11 +20,8 @@
   "keywords": [
     "react",
     "hook",
-    "next",
-    "nextjs",
-    "components",
-    "library",
-    "frontend"
+    "fetch",
+    "library"
   ],
   "type": "module",
   "files": [

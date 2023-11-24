@@ -28,6 +28,7 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
     transformRequest,
     transformResponse,
     transformResult,
+    fetcher: baseFetcher,
   } = baseArgs
 
   const allowBody = !NON_BODY_HTTP_METHODS.includes(method)
@@ -40,7 +41,6 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
   const [fetched, setFetched] = useState(false)
 
   const fetcher: FetcherFn<Result> = async (args) => {
-    const { fetcher: baseFetcher } = baseArgs
     if (baseFetcher) return baseFetcher(args)
 
     const { request } = args

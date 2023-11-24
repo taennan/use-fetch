@@ -135,7 +135,7 @@ All contributions are welcome. If you notice any bugs or have any feature reques
 
 [github-repo]: https://github.com/taennan/use-fetch
 
-[docs-customizing-requests]:          https://github.com/taennan/use-fetch/blob/main/docs/common-patterns.md
+[docs-customizing-requests]:          https://github.com/taennan/use-fetch/blob/main/docs/customizing-requests.md
 [docs-manually-triggering-requests]:  https://github.com/taennan/use-fetch/blob/main/docs/manually-triggering-requests.md
 [docs-common-patterns]:               https://github.com/taennan/use-fetch/blob/main/docs/common-patterns.md
 [docs-modifying-responses]:           https://github.com/taennan/use-fetch/blob/main/docs/modifying-responses.md

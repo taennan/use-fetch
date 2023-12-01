@@ -11,7 +11,7 @@ import { getUseFetchUrlParams } from '../utils/getUseFetchUrlParams'
 import { NON_BODY_HTTP_METHODS } from '../constants/http'
 
 export const useFetch = <Result, Params extends RequestParams, Body extends RequestBody>(
-  baseArgs: UseFetchArgs<Params, Body, Result>,
+  baseArgs: UseFetchArgs<Result, Params, Body>,
 ): UseFetchReturn<Result, Params, Body> => {
   const {
     method = 'GET',

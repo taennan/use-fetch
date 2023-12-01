@@ -26,7 +26,7 @@ export interface FetcherFnReturn<Result> {
 
 export type FetcherFn<Result> = (args: FetcherFnArgs) => Promise<FetcherFnReturn<Result>>
 
-export interface UseFetchArgs<Params extends RequestParams, Body extends RequestBody, Result>
+export interface UseFetchArgs<Result, Params extends RequestParams, Body extends RequestBody>
   extends Omit<UseFetchTriggerArgs<Params, Body>, 'url'> {
   url: string | FnReturns<string>
   method?: HttpMethod
@@ -59,5 +59,5 @@ export type UseFetchTriggerFn<Result, Params extends RequestParams, Body extends
 ) => Promise<Result>
 
 export type UseFetchHook<Result, Params extends RequestParams, Body extends RequestBody> = (
-  args: UseFetchArgs<Params, Body, Result>,
+  args: UseFetchArgs<Result, Params, Body>,
 ) => UseFetchReturn<Result, Params, Body>

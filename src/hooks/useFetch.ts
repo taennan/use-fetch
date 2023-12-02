@@ -1,5 +1,10 @@
-import type { FetcherFn, UseFetchArgs, UseFetchReturn, UseFetchTriggerFn } from '../types/useFetch'
-import type { RequestBody, RequestParams } from '../types/http'
+import type {
+  FetcherFn,
+  InternalTriggerFn,
+  UseFetchArgs,
+  UseFetchReturn,
+  UseFetchTriggerFn,
+} from '../types/useFetch'
 
 import { useState, useEffect } from 'react'
 import { getUseFetchRequestBody } from '../utils/getUseFetchRequestBody'
@@ -10,18 +15,15 @@ import { getUseFetchUrlParams } from '../utils/getUseFetchUrlParams'
 
 import { NON_BODY_HTTP_METHODS } from '../constants/http'
 
-export const useFetch = <Result, Params extends RequestParams, Body extends RequestBody>(
-  baseArgs: UseFetchArgs<Result, Params, Body>,
-): UseFetchReturn<Result, Params, Body> => {
+export const useFetch = <Result, QueryArgs>(
+  baseArgs: UseFetchArgs<Result, QueryArgs>,
+): UseFetchReturn<Result, QueryArgs> => {
   const {
-    method = 'GET',
+    query,
     resultType = 'infer',
     errorResultType = 'infer',
+    initialArgs,
     initialData,
-    triggerOnLoad = true,
-    triggerOnUrlChange = true,
-    triggerOnParamChange = true,
-    triggerOnBodyChange = true,
     transformRequestParams,
     transformRequestBody,
     transformRequestHeaders,
@@ -31,8 +33,6 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
     transformError,
     fetcher: baseFetcher,
   } = baseArgs
-
-  const allowBody = !NON_BODY_HTTP_METHODS.includes(method)
 
   const [data, setData] = useState<Result | undefined>(initialData)
   const [error, setError] = useState<any | undefined>()
@@ -52,31 +52,33 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
     const result = await getUseFetchResultFromResponse(response, resultType, errorResultType)
 
     if (response.ok) {
-      return { 
-        result, 
-        error: undefined 
+      return {
+        result,
+        error: undefined,
       }
     }
 
-    return { 
-      error: result, 
-      result: undefined 
+    return {
+      error: result,
+      result: undefined,
     }
   }
 
-  const trigger: UseFetchTriggerFn<Result, Params, Body> = async (triggerArgs = {}) => {
-    const params = getUseFetchUrlParams<Params>(
-      baseArgs.params,
-      triggerArgs.params,
-      transformRequestParams,
-    )
-    const url = getUseFetchRequestUrl(baseArgs.url, triggerArgs.url, params)
-    const body = getUseFetchRequestBody(baseArgs.body, triggerArgs.body, transformRequestBody)
-    const headers = getUseFetchRequestHeaders(
-      baseArgs.headers,
-      triggerArgs.headers,
-      transformRequestHeaders,
-    )
+  const internalTrigger: InternalTriggerFn<Result> = async (fetchOptions) => {
+    const {
+      method = 'GET',
+      params: rawParams,
+      url: rawUrl,
+      body: rawBody,
+      headers: rawHeaders,
+    } = fetchOptions
+
+    const allowBody = !NON_BODY_HTTP_METHODS.includes(method)
+
+    const params = getUseFetchUrlParams(rawParams, transformRequestParams)
+    const url = getUseFetchRequestUrl(rawUrl, params)
+    const body = getUseFetchRequestBody(rawBody, transformRequestBody)
+    const headers = getUseFetchRequestHeaders(rawHeaders, transformRequestHeaders)
 
     const rawRequest = new Request(url, {
       method,
@@ -102,6 +104,7 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
 
     setLoading(false)
     setFetched(true)
+    setInited(true)
 
     if (success) {
       return {
@@ -116,25 +119,16 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
     }
   }
 
+  const trigger: UseFetchTriggerFn<Result, QueryArgs> = async (args) => {
+    const fetchOptions = query(args)
+    const result = internalTrigger(fetchOptions)
+    return result
+  }
+
   useEffect(() => {
-    if (triggerOnLoad) trigger()
-    setInited(true)
+    if (inited || initialArgs === undefined) return
+    trigger(initialArgs)
   }, [])
-
-  useEffect(() => {
-    if (!triggerOnUrlChange || !inited) return
-    trigger()
-  }, [baseArgs.url])
-
-  useEffect(() => {
-    if (!triggerOnParamChange || !inited) return
-    trigger()
-  }, [baseArgs.params])
-
-  useEffect(() => {
-    if (!allowBody || !triggerOnBodyChange || !inited) return
-    trigger()
-  }, [baseArgs.body])
 
   return {
     data,

@@ -242,8 +242,8 @@ describe('useFetch', () => {
     fetchMock.mockResponseOnce(mockResult)
 
     const { result: hook } = renderHook(() =>
-      useFetch({ 
-        url: MOCK_URL + 'error-trigger-test', 
+      useFetch({
+        url: MOCK_URL + 'error-trigger-test',
         triggerOnLoad: false,
       }),
     )
@@ -267,8 +267,8 @@ describe('useFetch', () => {
     })
 
     const { result: hook } = renderHook(() =>
-      useFetch({ 
-        url: MOCK_URL + 'error-trigger-test', 
+      useFetch({
+        url: MOCK_URL + 'error-trigger-test',
         errorResultType: 'json',
         triggerOnLoad: false,
       }),

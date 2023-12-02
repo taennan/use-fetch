@@ -1,16 +1,8 @@
-import type { FnReturns } from './common'
 import type { HttpMethod, RequestBody, RequestHeaders, RequestParams } from './http'
 
 export type ResultType = 'text' | 'json'
 
 export type UseFetchArgsResultType = ResultType | 'infer'
-
-export interface UseFetchTriggerArgs<Params extends RequestParams, Body extends RequestBody> {
-  url?: string | FnReturns<string>
-  headers?: RequestHeaders | FnReturns<RequestHeaders>
-  params?: Params | FnReturns<Params>
-  body?: Body | FnReturns<Body>
-}
 
 export interface FetcherFnArgs {
   request: Request
@@ -19,30 +11,35 @@ export interface FetcherFnArgs {
   body?: RequestBody
 }
 
-export type FetcherReturn<Result> = {
-  error: undefined
-  result: Result
-} | {
-  error: any
-  result: undefined
-}
+export type FetcherReturn<Result> =
+  | {
+      error: undefined
+      result: Result
+    }
+  | {
+      error: any
+      result: undefined
+    }
 
 export type FetcherFn<Result> = (args: FetcherFnArgs) => Promise<FetcherReturn<Result>>
 
-export interface UseFetchArgs<Result, Params extends RequestParams, Body extends RequestBody>
-  extends Omit<UseFetchTriggerArgs<Params, Body>, 'url'> {
-  url: string | FnReturns<string>
+export interface FetchOptions {
+  url: string
   method?: HttpMethod
+  params?: RequestParams
+  body?: RequestBody
+  headers?: RequestHeaders
+}
+
+export interface UseFetchArgs<Result, QueryArgs> {
+  query: (args: QueryArgs) => FetchOptions
   resultType?: UseFetchArgsResultType
   errorResultType?: UseFetchArgsResultType
+  initialArgs?: QueryArgs
   initialData?: Result
-  triggerOnLoad?: boolean
-  triggerOnUrlChange?: boolean
-  triggerOnParamChange?: boolean
-  triggerOnBodyChange?: boolean
   fetcher?: FetcherFn<Result>
   transformRequestHeaders?: (headers?: RequestHeaders) => RequestHeaders
-  transformRequestParams?: (params?: Params) => RequestParams
+  transformRequestParams?: (params?: RequestParams) => RequestParams
   transformRequestBody?: (body?: RequestBody) => RequestBody
   transformRequest?: (request: Request) => Request
   transformResponse?: (response: Response) => Response
@@ -50,26 +47,32 @@ export interface UseFetchArgs<Result, Params extends RequestParams, Body extends
   transformError?: (error?: any) => any
 }
 
-export interface UseFetchReturn<Result, Params extends RequestParams, Body extends RequestBody> {
+export interface UseFetchReturn<Result, QueryArgs> {
   data?: Result
   error?: any
   loading: boolean
   fetched: boolean
-  trigger: UseFetchTriggerFn<Result, Params, Body>
+  trigger: UseFetchTriggerFn<Result, QueryArgs>
 }
 
-export type UseFetchTriggerReturn<Result> = {
-  error: undefined,
-  result: Result,
-} | {
-  error: any,
-  result: undefined,
-}
+export type UseFetchTriggerReturn<Result> =
+  | {
+      error: undefined
+      result: Result
+    }
+  | {
+      error: any
+      result: undefined
+    }
 
-export type UseFetchTriggerFn<Result, Params extends RequestParams, Body extends RequestBody> = (
-  args?: UseFetchTriggerArgs<Params, Body>,
+export type UseFetchTriggerFn<Result, QueryArgs> = (
+  args: QueryArgs,
 ) => Promise<UseFetchTriggerReturn<Result>>
 
-export type UseFetchHook<Result, Params extends RequestParams, Body extends RequestBody> = (
-  args: UseFetchArgs<Result, Params, Body>,
-) => UseFetchReturn<Result, Params, Body>
+export type UseFetchHook<Result, QueryArgs> = (
+  args: UseFetchArgs<Result, QueryArgs>,
+) => UseFetchReturn<Result, QueryArgs>
+
+export type InternalTriggerFn<Result> = (
+  fetchOptions: FetchOptions,
+) => Promise<UseFetchTriggerReturn<Result>>

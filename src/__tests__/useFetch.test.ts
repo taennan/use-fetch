@@ -236,4 +236,48 @@ describe('useFetch', () => {
     })
     expect(hook.current.error).not.toBeDefined()
   })
+
+  it('returns result from tigger function on successful request', async () => {
+    const mockResult = 'WOOHOO!'
+    fetchMock.mockResponseOnce(mockResult)
+
+    const { result: hook } = renderHook(() =>
+      useFetch({ 
+        url: MOCK_URL + 'error-trigger-test', 
+        triggerOnLoad: false,
+      }),
+    )
+
+    const { error, result } = await hook.current.trigger()
+
+    console.log(error, result)
+
+    expect(error).not.toBeDefined()
+    expect(result).toBeDefined()
+    expect(result).toEqual(mockResult)
+  })
+
+  it('returns error from tigger function on unsuccessful request', async () => {
+    const mockError = {
+      message: 'Not found',
+    }
+
+    fetchMock.mockResponseOnce(JSON.stringify(mockError), {
+      status: 404,
+    })
+
+    const { result: hook } = renderHook(() =>
+      useFetch({ 
+        url: MOCK_URL + 'error-trigger-test', 
+        errorResultType: 'json',
+        triggerOnLoad: false,
+      }),
+    )
+
+    const { error, result } = await hook.current.trigger()
+
+    expect(error).toBeDefined()
+    expect(error).toEqual(mockError)
+    expect(result).not.toBeDefined()
+  })
 })

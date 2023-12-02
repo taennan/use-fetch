@@ -28,6 +28,7 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
     transformRequest,
     transformResponse,
     transformResult,
+    transformError,
     fetcher: baseFetcher,
   } = baseArgs
 
@@ -50,7 +51,17 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
 
     const result = await getUseFetchResultFromResponse(response, resultType, errorResultType)
 
-    return { response, result }
+    if (response.ok) {
+      return { 
+        result, 
+        error: undefined 
+      }
+    }
+
+    return { 
+      error: result, 
+      result: undefined 
+    }
   }
 
   const trigger: UseFetchTriggerFn<Result, Params, Body> = async (triggerArgs = {}) => {
@@ -76,22 +87,33 @@ export const useFetch = <Result, Params extends RequestParams, Body extends Requ
 
     setLoading(true)
 
-    const { result: rawResult, response } = await fetcher({
+    const { result: rawResult, error: rawError } = await fetcher({
       request,
       headers,
       params,
       body,
     })
-    const result = transformResult ? transformResult(rawResult) : rawResult
+    const result: Result = transformResult ? transformResult(rawResult) : rawResult
+    const transformedError = transformError ? transformError(rawError) : rawError
 
-    const success = !response ? true : !!response.ok
+    const success = !rawError
     setData(success ? result : undefined)
-    setError(success ? undefined : result)
+    setError(success ? undefined : transformedError)
 
     setLoading(false)
     setFetched(true)
 
-    return result
+    if (success) {
+      return {
+        error: undefined,
+        result,
+      }
+    }
+
+    return {
+      error: rawError,
+      result: undefined,
+    }
   }
 
   useEffect(() => {

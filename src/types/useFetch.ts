@@ -19,12 +19,15 @@ export interface FetcherFnArgs {
   body?: RequestBody
 }
 
-export interface FetcherFnReturn<Result> {
+export type FetcherReturn<Result> = {
+  error: undefined
   result: Result
-  response?: Response
+} | {
+  error: any
+  result: undefined
 }
 
-export type FetcherFn<Result> = (args: FetcherFnArgs) => Promise<FetcherFnReturn<Result>>
+export type FetcherFn<Result> = (args: FetcherFnArgs) => Promise<FetcherReturn<Result>>
 
 export interface UseFetchArgs<Result, Params extends RequestParams, Body extends RequestBody>
   extends Omit<UseFetchTriggerArgs<Params, Body>, 'url'> {
@@ -43,7 +46,8 @@ export interface UseFetchArgs<Result, Params extends RequestParams, Body extends
   transformRequestBody?: (body?: RequestBody) => RequestBody
   transformRequest?: (request: Request) => Request
   transformResponse?: (response: Response) => Response
-  transformResult?: (result: any) => any
+  transformResult?: (result?: any) => any
+  transformError?: (error?: any) => any
 }
 
 export interface UseFetchReturn<Result, Params extends RequestParams, Body extends RequestBody> {
@@ -54,9 +58,17 @@ export interface UseFetchReturn<Result, Params extends RequestParams, Body exten
   trigger: UseFetchTriggerFn<Result, Params, Body>
 }
 
+export type UseFetchTriggerReturn<Result> = {
+  error: undefined,
+  result: Result,
+} | {
+  error: any,
+  result: undefined,
+}
+
 export type UseFetchTriggerFn<Result, Params extends RequestParams, Body extends RequestBody> = (
   args?: UseFetchTriggerArgs<Params, Body>,
-) => Promise<Result>
+) => Promise<UseFetchTriggerReturn<Result>>
 
 export type UseFetchHook<Result, Params extends RequestParams, Body extends RequestBody> = (
   args: UseFetchArgs<Result, Params, Body>,

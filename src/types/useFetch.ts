@@ -13,14 +13,18 @@ export type TransformResponseFn = (response: Response) => Response
 export type TransformResultFn = (result?: any) => any
 export type TransformErrorFn = (error?: any) => any
 
-export interface FetcherFnArgs {
-  request: Request
+export interface FetchOptions {
   url: string
-  headers?: RequestHeaders
+  method?: HttpMethod
   params?: RequestParams
   body?: RequestBody
+  headers?: RequestHeaders
   resultType?: UseFetchArgsResultType
   errorResultType?: UseFetchArgsResultType
+}
+
+export interface FetcherFnArgs extends FetchOptions {
+  request: Request
 }
 
 export type FetcherReturn<Result> =
@@ -35,15 +39,6 @@ export type FetcherReturn<Result> =
 
 export type FetcherFn<Result> = (args: FetcherFnArgs) => Promise<FetcherReturn<Result>>
 
-export interface FetchOptions {
-  url: string
-  method?: HttpMethod
-  params?: RequestParams
-  body?: RequestBody
-  headers?: RequestHeaders
-  resultType?: UseFetchArgsResultType
-  errorResultType?: UseFetchArgsResultType
-}
 
 export interface UseFetchArgs<Result, QueryArgs> {
   query: (args: QueryArgs) => FetchOptions

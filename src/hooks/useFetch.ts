@@ -92,6 +92,7 @@ export const useFetch = <Result, QueryArgs>(
     const { result: rawResult, error: rawError } = await fetcher({
       request,
       url,
+      method,
       headers,
       params,
       body,

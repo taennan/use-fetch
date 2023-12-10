@@ -4,7 +4,9 @@ If you would like complete control over how reqeusts are sent, it is possible to
 
 This is not to be confused with modifying a request, as that can be done using the transform functions which can also be passed to `useFetch` (for more info on this, see [here](docs-customizing-requests))
 
-A custom fetcher takes the url params, body, headers and `Request` object and should return an optional `Response` object as well as a value to be used as the `data` returned by `useFetch`
+A custom fetcher takes the url, http method, params, body, headers and `Request` object and should return an optional `Response` object as well as a value to be used as the `data` returned by `useFetch`
+
+As all request transformations will have been called before the fetcher is called, all args passed to the fetcher may have had transformations made on them
 
 ```ts
 const fetcher = async (args) => {

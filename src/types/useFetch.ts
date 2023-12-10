@@ -4,9 +4,9 @@ export type ResultType = 'text' | 'json'
 
 export type UseFetchArgsResultType = ResultType | 'infer'
 
-export type TransformRequestHeadersFn = (headers?: RequestHeaders) => RequestHeaders
+export type TransformRequestHeadersFn = (headers?: RequestHeaders) => RequestHeaders | undefined
 export type TransformRequestBodyFn = (body?: RequestBody) => RequestBody
-export type TransformRequestParamsFn = (params?: RequestParams) => RequestParams
+export type TransformRequestParamsFn = (params?: RequestParams) => RequestParams | undefined
 export type TransformRequestUrlFn = (url: string) => string
 export type TransformRequestFn = (request: Request) => Request
 export type TransformResponseFn = (response: Response) => Response
@@ -15,6 +15,7 @@ export type TransformErrorFn = (error?: any) => any
 
 export interface FetcherFnArgs {
   request: Request
+  url: string
   headers?: RequestHeaders
   params?: RequestParams
   body?: RequestBody

@@ -2,13 +2,11 @@
 
 ## Typing the hook
 
-The `useFetch` hook accepts __3__ type args
+The `useFetch` hook accepts __2__ type args
 
 The first is the type of the result you expect to receive as the body of a response from an api call
 
-The second is a `Record<string, any>`-like type which determines the url params appended to the url
-
-The third is the type of the request body you will be sending in an api call
+The second is the type of the `queryArgs` passed to the `query` function, which internally is used to build every request sent
 
 ```ts
 interface Person {
@@ -22,14 +20,20 @@ interface SearchArgs {
     dateOfBirth: Date
 }
 
-// We use `never` as the body type to stop us from passing bodies to the request in either the hook args or trigger function
-const typedParamsQuery = useFetch<Person, SearchArgs, never>(options)
+const typedQuery = (searchArgs: SearchArgs) => 
+    useFetch<Person, SearchArgs>({
+        queryArgs: searchArgs,
+        query: (args) => ({
+            url: '...',
+            body: args,
+        })
+    })
 
-// Here `never` is used again, but to stop url params being passed
-const typedBodyQuery = useFetch<Person, never, SearchArgs>(options)
-
-// Or, we could just allow url params AND bodies for whatever reason
-const typedFullyQuery = useFetch<Person, SearchArgs, SearchArgs>(options)
+// We use `void` as the `queryArgs` type to stop us from passing args to the request builder in either the hook args or trigger function
+const noArgsQuery = useFetch<Person, void>({
+    // We won't be allowed to have args in the query function or pass queryArgs to the hook at all
+    query: () => ({ url: '...' })
+})
 ```
 
 ## Body types

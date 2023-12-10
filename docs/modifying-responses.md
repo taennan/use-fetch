@@ -15,8 +15,15 @@ const transformResponse = (response: Response): Response => {
 
 const transformResult = (result: any): any => {
     // Here, we can access and modify the body of response
+    // Will only be called on successful requests
     const modifiedResult = toCamelCase(result)
     return modifiedResult
+}
+
+const transformError = (error: any): any => {
+    // Return the error if you wish to keep it unmodified
+    // Will only be called on unsuccessful requests
+    return error
 }
 
 const transformResponseQuery = useFetch<Result, never, never>({
@@ -24,6 +31,7 @@ const transformResponseQuery = useFetch<Result, never, never>({
     // Internally, the transform functions are called in the order they are listed here
     transformResponse,
     transformResult,
+    transformError,
 })
 ```
 

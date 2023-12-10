@@ -2,26 +2,24 @@
 
 ## Passing request data
 
-The `params`, `body`, `headers` and `url` of a request can be passed as either raw objects or functions which return an object (or `string` in the case of `url`) to be used by the request
+The data passed to `queryArgs` in `useFetch` is used internally by the `query` function in order to generate a `Request`.
 
-If used directly in components, these objects and functions __MUST__ be wrapped in `useCallback` to stop fetches from triggering continuously
+If an object, the data passed to `queryArgs` __MUST__ be wrapped in `useState` or `useMemo` to stop infinite fetches when `triggerOnQueryArgsChange` is true
 
 ```ts
 import { useState, useCallback } from 'react'
 
-const [params] = useState({ a: 1, b: '2' })
-const getHeaders = useCallback(() => {
-    return { accessToken: 'gimme_access!' }
-})
+const [headers] = useState({ accessToken: 'gimme_access!' })
+const [body] = useState({ a: 'B', c: 'Easy as 1, 2, 3' })
+const queryArgs = useMemo(() => ({ headers, body }), [headers, body])
 
-const noFunctionQuery = useFetch({
-    // If passing a raw string or number, we do not need to wrap in state
-    url: 'http://my-api',
-    body: 42,
-    // When passing an object, we must wrap it in state to stop constant fetches
-    params,
-    // We also must wrap functions in useCallback to stop constant fetches
-    headers: getHeaders,
+const query = useFetch({
+    queryArgs,
+    query: ({ headers, body }) => ({
+        url: 'http://my-api',
+        headers,
+        body,
+    })
 })
 ```
 
@@ -78,35 +76,32 @@ interface SearchArgs {
 }
 
 // This hook can then be imported into a component and will run whenever `email` is changed
-const getUserByEmailQuery = (email: string) => (
-    useFetch<User, SearchArgs, never>({
-        url: 'http://my-api.com',
-        params: { email }
+const getUserByEmailQuery = (email: string) =>
+    useFetch<User | null, string>({
+        queryArgs: email,
+        query: (args) => ({
+            url: 'http://my-api.com',
+            params: { email }
+        })
     })
-)
 ```
 
 ## Determining when requests are automatically sent
 
 By default, `useFetch` triggers fetches at these times:
 - On mount
-- On change to `params` arg
-- On change to `body` arg if not a `GET` or `HEAD` request
-- On change to `url` arg
+- On change to `queryArgs` arg
 
-These can all be toggled using the following `boolean` args
+These can all be toggled using the following `boolean` args passed to the `useFetch` hook
 - `triggerOnLoad`
-- `triggerOnUrlChange`
-- `triggerOnParamChange`
-- `triggerOnBodyChange`
+- `triggerOnQueryArgsChange`
 
-The following example will only automatically trigger a fetch when mounted and when the `params` arg changes
+The following example will only automatically trigger a fetch when mounted, but not when `queryArgs` change
 
 ```ts
 const triggerToggleQuery = useFetch({
     ...options,
-    triggerOnUrlChange: false,
-    triggerOnParamChange: false,
+    triggerOnQueryArgsChange: false,
 })
 ```
 

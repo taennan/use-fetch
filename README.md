@@ -59,17 +59,23 @@ interface CreateTodoBody {
 }
 
 // useFetch can be used directly in a component, but is far cleaner and DRYer when abstracted over in a custom hook
-export const useSearchTodosQuery = (params: Partial<Todo>) => 
-    useFetch<Todo[], SearchTodosParams, never>({
-        url: 'https://my-api.com/todos',
-        params,
+export const useSearchTodosQuery = (params: SearchTodosParams) => 
+    useFetch<Todo[], SearchTodosParams>({
+        queryArgs: params,
+        query: (args) => ({
+            url: 'https://my-api.com/todos',
+            params: args
+        })
     })
 
 export const useCreateTodoQuery = () => 
-    useFetch<Todo, never, CreateTodoBody | undefined>({
-        url: 'https://my-api.com/todos',
-        method: 'POST',
+    useFetch<Todo, CreateTodoBody>({
         triggerOnLoad: false,
+        query: (args) => ({
+            url: 'https://my-api.com/todos',
+            method: 'POST',
+            body: args
+        })
     })
 ```
 
@@ -79,14 +85,15 @@ export const useCreateTodoQuery = () =>
 import { useSearchTodosQuery, useCreateTodoQuery } from './api'
 
 export const Todos = () => {
-    const searchTodosQuery = useSearchTodosQuery({ completed: true })
+    const [searchTodosParams] = useState({ completed: true })
+    const searchTodosQuery = useSearchTodosQuery(searchTodosParams)
     const createTodoQuery = useCreateTodoQuery()
 
     const createTodo = async (name: string) => {
         // Creates a new Todo with specified name, 
         // then re-runs the search query to update the list of Todo's
         await createTodoQuery.trigger({ name })
-        await searchTodosQuery.trigger()
+        await searchTodosQuery.trigger(searchTodosParams)
     }
 
     return (

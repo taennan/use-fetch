@@ -91,16 +91,19 @@ export const useFetch = <Result, QueryArgs>(
 
     const { result: rawResult, error: rawError } = await fetcher({
       request,
+      url,
       headers,
       params,
       body,
       resultType,
       errorResultType,
     })
-    const result: Result = transformResult ? transformResult(rawResult) : rawResult
-    const transformedError = transformError ? transformError(rawError) : rawError
 
     const success = !rawError
+
+    const result: Result = success && transformResult ? transformResult(rawResult) : rawResult
+    const transformedError = !success && transformError ? transformError(rawError) : rawError
+
     setData(success ? result : undefined)
     setError(success ? undefined : transformedError)
 

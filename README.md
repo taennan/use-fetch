@@ -4,7 +4,7 @@ _Yet another hook in your_ [`@helpful-hooks`](npm-helpful-hooks) _toolbox!_
 
 The `@helpful-hooks/use-fetch` package is designed to be a lightweight, flexible and extensible solution for making fetch requests and api calls
 
-It follows a similar design to [rtk-query](npm-rtk-query), but allows for __easy__ and __complete__ customization over the raw requests and responses, when requests are sent, whether they are sent at all, how urls, request and response payloads are processed before being sent on their way and much more.
+It follows a similar design to established packages like [rtk-query](npm-rtk-query) and [@tanstack/react-query](npm-tanstack-react-query), but allows for __easy__ and __complete__ customization over the raw requests and responses, when requests are sent, whether they are sent at all, how urls, request and response payloads are processed before being sent on their way and much more.
 
 Excited by the possibilities? Read on to find out more!
 
@@ -151,3 +151,4 @@ All contributions are welcome. If you notice any bugs or have any feature reques
 
 [npm-helpful-hooks]: https://www.npmjs.com/search?q=%40helpful-hooks
 [npm-rtk-query]: https://www.npmjs.com/package/@reduxjs/toolkit
+[npm-tanstack-react-query]: https://www.npmjs.com/package/@tanstack/react-query

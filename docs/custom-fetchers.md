@@ -10,7 +10,7 @@ As all request transformations will have been called before the fetcher is calle
 
 ```ts
 const fetcher = async (args) => {
-    const { request, headers, params, body } = args
+    const { request, url, headers, params, body } = args
 
     // Example 1
     // We can initiate the fetch ourselves like `useFetch` does by default

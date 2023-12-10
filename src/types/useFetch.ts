@@ -39,7 +39,6 @@ export type FetcherReturn<Result> =
 
 export type FetcherFn<Result> = (args: FetcherFnArgs) => Promise<FetcherReturn<Result>>
 
-
 export interface UseFetchArgs<Result, QueryArgs> {
   query: (args: QueryArgs) => FetchOptions
   queryArgs?: QueryArgs

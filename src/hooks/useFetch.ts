@@ -137,7 +137,7 @@ export const useFetch = <Result, QueryArgs>(
 
   useEffect(() => {
     if (!triggerOnLoad || inited) {
-      setInited(true)  
+      setInited(true)
       return
     }
     trigger(queryArgs as QueryArgs)

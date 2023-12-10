@@ -21,10 +21,10 @@ describe('useFetch', () => {
     fetchMock.mockResponseOnce(mockResult)
 
     const { result: hook, waitForNextUpdate } = renderHook(() =>
-      useFetch({ 
+      useFetch({
         query: () => ({
-          url: MOCK_URL + 'data'
-        })
+          url: MOCK_URL + 'data',
+        }),
       }),
     )
 
@@ -45,12 +45,12 @@ describe('useFetch', () => {
     })
 
     const { result: hook, waitForNextUpdate } = renderHook(() =>
-      useFetch({ 
+      useFetch({
         query: () => ({
-          url: MOCK_URL + 'error', 
+          url: MOCK_URL + 'error',
           errorResultType: 'json',
-        })
-       }),
+        }),
+      }),
     )
 
     await waitForNextUpdate()
@@ -65,12 +65,12 @@ describe('useFetch', () => {
     fetchMock.mockResponseOnce(mockResult)
 
     const { result: hook, waitForNextUpdate } = renderHook(() =>
-      useFetch<any, void>({ 
+      useFetch<any, void>({
         triggerOnLoad: false,
         query: () => ({
           url: MOCK_URL + 'no-trigger-on-load',
         }),
-       }),
+      }),
     )
 
     expect(hook.current.data).not.toBeDefined()
@@ -92,7 +92,7 @@ describe('useFetch', () => {
     let triggerCount: number = 0
     let queryArgs = { num: 7 }
     const getResult = (n: number) => ({
-      message: `Number is ${n}`
+      message: `Number is ${n}`,
     })
 
     fetchMock.mockResponse(async (req) => {
@@ -114,7 +114,7 @@ describe('useFetch', () => {
           method: 'POST',
           resultType: 'json',
           body: args,
-        })
+        }),
       }),
     )
 
@@ -152,7 +152,7 @@ describe('useFetch', () => {
         queryArgs: memoHook.current,
         query: () => ({
           url: MOCK_URL + 'no-trigger-on-change-to-triggerOnQueryArgsChange',
-        })
+        }),
       }),
     )
 
@@ -189,7 +189,7 @@ describe('useFetch', () => {
         query: () => ({
           url,
           params: urlParams,
-        })
+        }),
       }),
     )
 
@@ -239,7 +239,7 @@ describe('useFetch', () => {
         triggerOnLoad: false,
         query: () => ({
           url: MOCK_URL + 'success-trigger',
-        })
+        }),
       }),
     )
 
@@ -287,7 +287,7 @@ describe('useFetch', () => {
     )
 
     expect(hook.current.data).toBe(123)
-    
+
     act(() => hook.current.reset())
 
     expect(hook.current.data).not.toBeDefined()
@@ -315,7 +315,7 @@ describe('useFetch', () => {
 
     expect(hook.current.data).not.toBeDefined()
     expect(hook.current.error).toEqual(mockError)
-    
+
     act(() => hook.current.reset())
 
     expect(hook.current.data).not.toBeDefined()

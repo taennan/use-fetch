@@ -1,5 +1,9 @@
 # Typescript Tips
 
+## Contents
+- [Typing the hook](#typing-the-hook)
+- [Body types](#body-types)
+
 ## Typing the hook
 
 The `useFetch` hook accepts __2__ type args

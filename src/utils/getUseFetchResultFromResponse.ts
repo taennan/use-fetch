@@ -6,7 +6,7 @@ export const getUseFetchResultFromResponse = async (
   response: Response,
   successResultType: UseFetchArgsResultType,
   errorResultType: UseFetchArgsResultType,
-) => {
+): Promise<any> => {
   const { ok } = response
   const resultType = ok ? successResultType : errorResultType
   const inferredResultType = resultType === 'infer' ? inferResultType(response) : resultType

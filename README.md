@@ -125,9 +125,9 @@ export const Todos = () => {
 
 If you would like to find out about the other cool fetures provided by this hook, check out the links below to our documentation pages:
 
+- [The Basics](docs-basics)
 - [Customizing requests](docs-customizing-requests)
 - [Manually triggering requests](docs-manually-triggering-requests)
-- [Common patterns](docs-common-patterns)
 - [Modifying responses](docs-modifying-responses)
 - [Custom fetchers](docs-custom-fetchers)
 - [Typescript tips](docs-typescript-tips)
@@ -142,9 +142,9 @@ All contributions are welcome. If you notice any bugs or have any feature reques
 
 [github-repo]: https://github.com/taennan/use-fetch
 
+[docs-basics]:               https://github.com/taennan/use-fetch/blob/main/docs/basics.md
 [docs-customizing-requests]:          https://github.com/taennan/use-fetch/blob/main/docs/customizing-requests.md
 [docs-manually-triggering-requests]:  https://github.com/taennan/use-fetch/blob/main/docs/manually-triggering-requests.md
-[docs-common-patterns]:               https://github.com/taennan/use-fetch/blob/main/docs/common-patterns.md
 [docs-modifying-responses]:           https://github.com/taennan/use-fetch/blob/main/docs/modifying-responses.md
 [docs-custom-fetchers]:               https://github.com/taennan/use-fetch/blob/main/docs/custom-fetchers.md
 [docs-typescript-tips]:               https://github.com/taennan/use-fetch/blob/main/docs/typescript-tips.md

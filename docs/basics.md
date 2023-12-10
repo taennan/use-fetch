@@ -1,10 +1,19 @@
-# Common Patterns
+# The Basics
+
+## Contents
+
+- [Passing request data](#passing-request-data)
+- [Using response data](#using-response-data)
+- [Determining when requests are automatically sent](#determining-when-requests-are-automatically-sent)
+- [Explicitly setting result type](#explicitly-setting-result-type)
 
 ## Passing request data
 
-The data passed to `queryArgs` in `useFetch` is used internally by the `query` function in order to generate a `Request`.
+The data passed to `queryArgs` in `useFetch` is used internally by the `query` function in order to generate a `Request`
 
-If an object, the data passed to `queryArgs` __MUST__ be wrapped in `useState` or `useMemo` to stop infinite fetches when `triggerOnQueryArgsChange` is true
+By default, any change in `queryArgs` will cause a request to be sent automatically
+
+If the data passed to `queryArgs` is an object, it __MUST__ be wrapped in `useState` or `useMemo` to stop infinite fetches when `triggerOnQueryArgsChange` is true
 
 ```ts
 import { useState, useCallback } from 'react'
@@ -56,34 +65,6 @@ const QuoteOfTheDayComponent = () => {
 
     return null
 }
-```
-
-## Declaring custom hooks outside components
-
-As `useFetch` is designed to be as flexible as possible, it exposes many args which are not always required in most cases
-
-It is recommended to wrap `useFetch` in a custom hook outside any component to keep it reusable and to only expose the necessary args inside components
-
-```ts
-interface User {
-    id: number
-    email: string
-}
-
-interface SearchArgs {
-    id: number
-    email: string
-}
-
-// This hook can then be imported into a component and will run whenever `email` is changed
-const getUserByEmailQuery = (email: string) =>
-    useFetch<User | null, string>({
-        queryArgs: email,
-        query: (args) => ({
-            url: 'http://my-api.com',
-            params: { email }
-        })
-    })
 ```
 
 ## Determining when requests are automatically sent

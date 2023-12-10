@@ -1,5 +1,6 @@
 import { enableFetchMocks } from 'jest-fetch-mock'
 import { act, renderHook } from '@testing-library/react-hooks'
+import { useMemo } from 'react'
 import { useFetch } from '../hooks/useFetch'
 
 enableFetchMocks()
@@ -20,13 +21,17 @@ describe('useFetch', () => {
     fetchMock.mockResponseOnce(mockResult)
 
     const { result: hook, waitForNextUpdate } = renderHook(() =>
-      useFetch({ url: MOCK_URL + 'data-test', resultType: 'text' }),
+      useFetch({ 
+        query: () => ({
+          url: MOCK_URL + 'data'
+        })
+      }),
     )
 
     await waitForNextUpdate()
 
     expect(hook.current.data).toBeDefined()
-    expect(hook.current.data).toEqual(mockResult)
+    expect(hook.current.data).toBe(mockResult)
     expect(hook.current.error).not.toBeDefined()
   })
 
@@ -40,7 +45,12 @@ describe('useFetch', () => {
     })
 
     const { result: hook, waitForNextUpdate } = renderHook(() =>
-      useFetch({ url: MOCK_URL + 'error-test', errorResultType: 'json' }),
+      useFetch({ 
+        query: () => ({
+          url: MOCK_URL + 'error', 
+          errorResultType: 'json',
+        })
+       }),
     )
 
     await waitForNextUpdate()
@@ -55,7 +65,12 @@ describe('useFetch', () => {
     fetchMock.mockResponseOnce(mockResult)
 
     const { result: hook, waitForNextUpdate } = renderHook(() =>
-      useFetch({ url: MOCK_URL + 'error-test', resultType: 'text', triggerOnLoad: false }),
+      useFetch<any, void>({ 
+        triggerOnLoad: false,
+        query: () => ({
+          url: MOCK_URL + 'no-trigger-on-load',
+        }),
+       }),
     )
 
     expect(hook.current.data).not.toBeDefined()
@@ -69,45 +84,98 @@ describe('useFetch', () => {
     await waitForNextUpdate()
 
     expect(hook.current.data).toBeDefined()
-    expect(hook.current.data).toEqual(mockResult)
+    expect(hook.current.data).toBe(mockResult)
     expect(hook.current.error).not.toBeDefined()
   })
 
-  it('uses correct body when passed via function', async () => {
-    const mockBody = {
-      a: 'Apple',
-      b: 2,
-    }
-    const getBody = () => mockBody
-
-    fetchMock.mockResponseOnce(async (req) => {
-      const body = await req.json()
-      return JSON.stringify(body)
+  it('triggers a fetch on query args change', async () => {
+    let triggerCount: number = 0
+    let queryArgs = { num: 7 }
+    const getResult = (n: number) => ({
+      message: `Number is ${n}`
     })
 
-    const { result: hook, waitForNextUpdate } = renderHook(() =>
+    fetchMock.mockResponse(async (req) => {
+      triggerCount++
+      const { num } = await req.json()
+      return JSON.stringify(getResult(num))
+    })
+
+    const {
+      result: hook,
+      rerender,
+      waitForNextUpdate,
+    } = renderHook(() =>
       useFetch({
-        method: 'POST',
-        resultType: 'json',
-        url: MOCK_URL + 'fn-body-test',
-        body: getBody,
+        triggerOnLoad: false,
+        queryArgs,
+        query: (args) => ({
+          url: MOCK_URL + 'query-arg-change-trigger',
+          method: 'POST',
+          resultType: 'json',
+          body: args,
+        })
       }),
     )
 
+    expect(triggerCount).toEqual(0)
+    expect(hook.current.data).not.toBeDefined()
+    expect(hook.current.error).not.toBeDefined()
+    expect(hook.current.fetched).toBe(false)
+
+    queryArgs = { num: 117 }
+    rerender()
+
     await waitForNextUpdate()
 
+    expect(triggerCount).toEqual(1)
     expect(hook.current.data).toBeDefined()
-    expect(hook.current.data).toEqual(mockBody)
+    expect(hook.current.data).toEqual(getResult(queryArgs.num))
     expect(hook.current.error).not.toBeDefined()
+    expect(hook.current.fetched).toBe(true)
   })
 
-  it('uses correct params when passed via function', async () => {
+  it('does not trigger a fetch on change to triggerOnQueryArgsChange', async () => {
+    let triggerCount: number = 0
+    let triggerOnQueryArgsChange = false
+
+    fetchMock.mockResponse(async () => {
+      triggerCount++
+      return 'SUCCESS'
+    })
+
+    const { result: memoHook } = renderHook(() => useMemo(() => 10, []))
+    const { result: hook, rerender } = renderHook(() =>
+      useFetch({
+        triggerOnLoad: false,
+        triggerOnQueryArgsChange,
+        queryArgs: memoHook.current,
+        query: () => ({
+          url: MOCK_URL + 'no-trigger-on-change-to-triggerOnQueryArgsChange',
+        })
+      }),
+    )
+
+    expect(triggerCount).toEqual(0)
+    expect(hook.current.data).not.toBeDefined()
+    expect(hook.current.error).not.toBeDefined()
+    expect(hook.current.fetched).toBe(false)
+
+    triggerOnQueryArgsChange = true
+    rerender()
+
+    expect(triggerCount).toEqual(0)
+    expect(hook.current.data).not.toBeDefined()
+    expect(hook.current.error).not.toBeDefined()
+    expect(hook.current.fetched).toBe(false)
+  })
+
+  it('uses passed params in url', async () => {
     const url = MOCK_URL + 'fn-param-test'
     const urlParams = {
       a: 'Apple',
       b: 2,
     }
-    const getUrlParams = () => urlParams
 
     fetchMock.mockResponseOnce(async (req) => {
       expect(req.url).toMatch(new RegExp(`^${url}\?`))
@@ -118,84 +186,14 @@ describe('useFetch', () => {
 
     const { waitForNextUpdate } = renderHook(() =>
       useFetch({
-        url,
-        resultType: 'text',
-        params: getUrlParams,
+        query: () => ({
+          url,
+          params: urlParams,
+        })
       }),
     )
 
     await waitForNextUpdate()
-  })
-
-  it('triggers a fetch on param change', async () => {
-    const mockResult = 'TEST'
-    let urlParams = { a: 10 }
-    let triggerCount: number = 0
-
-    fetchMock.mockResponse(async () => {
-      triggerCount++
-      return mockResult
-    })
-
-    const {
-      result: hook,
-      rerender,
-      waitForNextUpdate,
-    } = renderHook(() =>
-      useFetch({
-        url: MOCK_URL + 'param-change-fetch',
-        resultType: 'text',
-        params: urlParams,
-        triggerOnLoad: false,
-      }),
-    )
-
-    expect(triggerCount).toEqual(0)
-    expect(hook.current.data).not.toBeDefined()
-    expect(hook.current.error).not.toBeDefined()
-
-    urlParams = { a: 43 }
-    rerender()
-
-    await waitForNextUpdate()
-
-    expect(triggerCount).toEqual(1)
-    expect(hook.current.data).toBeDefined()
-    expect(hook.current.data).toEqual(mockResult)
-    expect(hook.current.error).not.toBeDefined()
-  })
-
-  it('does not trigger a fetch on change to triggerOnBodyChange', async () => {
-    let triggerCount: number = 0
-    let triggerOnBodyChange = false
-    const body = {}
-
-    fetchMock.mockResponse(async () => {
-      triggerCount++
-      return 'SUCCESS'
-    })
-
-    const { result: hook, rerender } = renderHook(() =>
-      useFetch({
-        url: MOCK_URL + 'no-trigger-on-change-to-triggerOnBodyChange',
-        resultType: 'text',
-        method: 'post',
-        body,
-        triggerOnLoad: false,
-        triggerOnBodyChange,
-      }),
-    )
-
-    expect(triggerCount).toEqual(0)
-    expect(hook.current.data).not.toBeDefined()
-    expect(hook.current.error).not.toBeDefined()
-
-    triggerOnBodyChange = true
-    rerender()
-
-    expect(triggerCount).toEqual(0)
-    expect(hook.current.data).not.toBeDefined()
-    expect(hook.current.error).not.toBeDefined()
   })
 
   it('transforms body before sending request', async () => {
@@ -203,22 +201,17 @@ describe('useFetch', () => {
       a: 'Apple',
       b: 2,
     }
-    const getBody = () => mockBody
 
-    fetchMock.mockResponseOnce(async (req) => {
-      const body = await req.json()
-      const convertedBody = Object.fromEntries(
-        Object.entries(body).map(([k, v]) => [k.toUpperCase(), v]),
-      )
-      return JSON.stringify(convertedBody)
-    })
+    fetchMock.mockResponseOnce(async (req) => req.text())
 
     const { result: hook, waitForNextUpdate } = renderHook(() =>
       useFetch({
-        method: 'POST',
-        resultType: 'json',
-        url: MOCK_URL + 'transform-request-body',
-        body: getBody,
+        query: () => ({
+          url: MOCK_URL + 'transform-request-body',
+          method: 'POST',
+          resultType: 'json',
+          body: mockBody,
+        }),
         transformRequestBody: (body) => {
           if (!body) return body
           const entries = Object.entries(body).map(([k, v]) => [k.toUpperCase(), v])
@@ -237,27 +230,26 @@ describe('useFetch', () => {
     expect(hook.current.error).not.toBeDefined()
   })
 
-  it('returns result from tigger function on successful request', async () => {
+  it('returns result from trigger function on successful request', async () => {
     const mockResult = 'WOOHOO!'
     fetchMock.mockResponseOnce(mockResult)
 
     const { result: hook } = renderHook(() =>
-      useFetch({
-        url: MOCK_URL + 'error-trigger-test',
+      useFetch<string, void>({
         triggerOnLoad: false,
+        query: () => ({
+          url: MOCK_URL + 'error-trigger-test',
+        })
       }),
     )
 
     const { error, result } = await hook.current.trigger()
-
-    console.log(error, result)
-
     expect(error).not.toBeDefined()
     expect(result).toBeDefined()
     expect(result).toEqual(mockResult)
   })
 
-  it('returns error from tigger function on unsuccessful request', async () => {
+  it('returns error from trigger function on unsuccessful request', async () => {
     const mockError = {
       message: 'Not found',
     }
@@ -267,15 +259,16 @@ describe('useFetch', () => {
     })
 
     const { result: hook } = renderHook(() =>
-      useFetch({
-        url: MOCK_URL + 'error-trigger-test',
-        errorResultType: 'json',
+      useFetch<typeof mockError, void>({
         triggerOnLoad: false,
+        query: () => ({
+          url: MOCK_URL + 'error-trigger-test',
+          errorResultType: 'json',
+        }),
       }),
     )
 
     const { error, result } = await hook.current.trigger()
-
     expect(error).toBeDefined()
     expect(error).toEqual(mockError)
     expect(result).not.toBeDefined()

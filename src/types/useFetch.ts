@@ -4,11 +4,21 @@ export type ResultType = 'text' | 'json'
 
 export type UseFetchArgsResultType = ResultType | 'infer'
 
+export type TransformRequestHeadersFn = (headers?: RequestHeaders) => RequestHeaders
+export type TransformRequestParamsFn = (params?: RequestParams) => RequestParams
+export type TransformRequestBodyFn = (body?: RequestBody) => RequestBody
+export type TransformRequestFn = (request: Request) => Request
+export type TransformResponseFn = (response: Response) => Response
+export type TransformResultFn = (result?: any) => any
+export type TransformErrorFn = (error?: any) => any
+
 export interface FetcherFnArgs {
   request: Request
   headers?: RequestHeaders
   params?: RequestParams
   body?: RequestBody
+  resultType?: UseFetchArgsResultType
+  errorResultType?: UseFetchArgsResultType
 }
 
 export type FetcherReturn<Result> =
@@ -29,22 +39,24 @@ export interface FetchOptions {
   params?: RequestParams
   body?: RequestBody
   headers?: RequestHeaders
+  resultType?: UseFetchArgsResultType
+  errorResultType?: UseFetchArgsResultType
 }
 
 export interface UseFetchArgs<Result, QueryArgs> {
   query: (args: QueryArgs) => FetchOptions
-  resultType?: UseFetchArgsResultType
-  errorResultType?: UseFetchArgsResultType
-  initialArgs?: QueryArgs
+  queryArgs?: QueryArgs
   initialData?: Result
+  triggerOnLoad?: boolean
+  triggerOnQueryArgsChange?: boolean
   fetcher?: FetcherFn<Result>
-  transformRequestHeaders?: (headers?: RequestHeaders) => RequestHeaders
-  transformRequestParams?: (params?: RequestParams) => RequestParams
-  transformRequestBody?: (body?: RequestBody) => RequestBody
-  transformRequest?: (request: Request) => Request
-  transformResponse?: (response: Response) => Response
-  transformResult?: (result?: any) => any
-  transformError?: (error?: any) => any
+  transformRequestHeaders?: TransformRequestHeadersFn
+  transformRequestParams?: TransformRequestParamsFn
+  transformRequestBody?: TransformRequestBodyFn
+  transformRequest?: TransformRequestFn
+  transformResponse?: TransformResponseFn
+  transformResult?: TransformResultFn
+  transformError?: TransformErrorFn
 }
 
 export interface UseFetchReturn<Result, QueryArgs> {

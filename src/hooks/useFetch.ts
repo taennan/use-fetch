@@ -7,11 +7,8 @@ import type {
 } from '../types/useFetch'
 
 import { useState, useEffect } from 'react'
-import { getUseFetchRequestBody } from '../utils/getUseFetchRequestBody'
-import { getUseFetchRequestHeaders } from '../utils/getUseFetchRequestHeaders'
 import { getUseFetchRequestUrl } from '../utils/getUseFetchRequestUrl'
 import { getUseFetchResultFromResponse } from '../utils/getUseFetchResultFromResponse'
-import { getUseFetchUrlParams } from '../utils/getUseFetchUrlParams'
 
 import { NON_BODY_HTTP_METHODS } from '../constants/http'
 
@@ -20,10 +17,10 @@ export const useFetch = <Result, QueryArgs>(
 ): UseFetchReturn<Result, QueryArgs> => {
   const {
     query,
-    resultType = 'infer',
-    errorResultType = 'infer',
-    initialArgs,
+    queryArgs,
     initialData,
+    triggerOnLoad = true,
+    triggerOnQueryArgsChange = true,
     transformRequestParams,
     transformRequestBody,
     transformRequestHeaders,
@@ -44,7 +41,7 @@ export const useFetch = <Result, QueryArgs>(
   const fetcher: FetcherFn<Result> = async (args) => {
     if (baseFetcher) return baseFetcher(args)
 
-    const { request } = args
+    const { request, resultType = 'infer', errorResultType = 'infer' } = args
 
     const rawResponse = await fetch(request)
     const response = transformResponse ? transformResponse(rawResponse) : rawResponse
@@ -71,14 +68,16 @@ export const useFetch = <Result, QueryArgs>(
       url: rawUrl,
       body: rawBody,
       headers: rawHeaders,
+      resultType,
+      errorResultType,
     } = fetchOptions
 
     const allowBody = !NON_BODY_HTTP_METHODS.includes(method)
 
-    const params = getUseFetchUrlParams(rawParams, transformRequestParams)
+    const body = transformRequestBody ? transformRequestBody(rawBody) : rawBody
+    const headers = transformRequestHeaders ? transformRequestHeaders(rawHeaders) : rawHeaders
+    const params = transformRequestParams ? transformRequestParams(rawParams) : rawParams
     const url = getUseFetchRequestUrl(rawUrl, params)
-    const body = getUseFetchRequestBody(rawBody, transformRequestBody)
-    const headers = getUseFetchRequestHeaders(rawHeaders, transformRequestHeaders)
 
     const rawRequest = new Request(url, {
       method,
@@ -94,6 +93,8 @@ export const useFetch = <Result, QueryArgs>(
       headers,
       params,
       body,
+      resultType,
+      errorResultType,
     })
     const result: Result = transformResult ? transformResult(rawResult) : rawResult
     const transformedError = transformError ? transformError(rawError) : rawError
@@ -104,7 +105,6 @@ export const useFetch = <Result, QueryArgs>(
 
     setLoading(false)
     setFetched(true)
-    setInited(true)
 
     if (success) {
       return {
@@ -126,9 +126,18 @@ export const useFetch = <Result, QueryArgs>(
   }
 
   useEffect(() => {
-    if (inited || initialArgs === undefined) return
-    trigger(initialArgs)
+    if (!triggerOnLoad || inited) {
+      setInited(true)  
+      return
+    }
+    trigger(queryArgs as QueryArgs)
+    setInited(true)
   }, [])
+
+  useEffect(() => {
+    if (!triggerOnQueryArgsChange || !inited) return
+    trigger(queryArgs as QueryArgs)
+  }, [queryArgs])
 
   return {
     data,

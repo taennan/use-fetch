@@ -21,9 +21,10 @@ export const useFetch = <Result, QueryArgs>(
     initialData,
     triggerOnLoad = true,
     triggerOnQueryArgsChange = true,
-    transformRequestParams,
     transformRequestBody,
     transformRequestHeaders,
+    transformRequestParams,
+    transformRequestUrl,
     transformRequest,
     transformResponse,
     transformResult,
@@ -77,7 +78,7 @@ export const useFetch = <Result, QueryArgs>(
     const body = transformRequestBody ? transformRequestBody(rawBody) : rawBody
     const headers = transformRequestHeaders ? transformRequestHeaders(rawHeaders) : rawHeaders
     const params = transformRequestParams ? transformRequestParams(rawParams) : rawParams
-    const url = getUseFetchRequestUrl(rawUrl, params)
+    const url = getUseFetchRequestUrl(rawUrl, params, transformRequestUrl)
 
     const rawRequest = new Request(url, {
       method,
@@ -125,6 +126,11 @@ export const useFetch = <Result, QueryArgs>(
     return result
   }
 
+  const reset = () => {
+    setData(undefined)
+    setError(undefined)
+  }
+
   useEffect(() => {
     if (!triggerOnLoad || inited) {
       setInited(true)  
@@ -145,5 +151,6 @@ export const useFetch = <Result, QueryArgs>(
     loading,
     fetched,
     trigger,
+    reset,
   }
 }

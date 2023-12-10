@@ -171,7 +171,7 @@ describe('useFetch', () => {
   })
 
   it('uses passed params in url', async () => {
-    const url = MOCK_URL + 'fn-param-test'
+    const url = MOCK_URL + 'fn-param'
     const urlParams = {
       a: 'Apple',
       b: 2,
@@ -238,7 +238,7 @@ describe('useFetch', () => {
       useFetch<string, void>({
         triggerOnLoad: false,
         query: () => ({
-          url: MOCK_URL + 'error-trigger-test',
+          url: MOCK_URL + 'success-trigger',
         })
       }),
     )
@@ -262,7 +262,7 @@ describe('useFetch', () => {
       useFetch<typeof mockError, void>({
         triggerOnLoad: false,
         query: () => ({
-          url: MOCK_URL + 'error-trigger-test',
+          url: MOCK_URL + 'error-trigger',
           errorResultType: 'json',
         }),
       }),
@@ -272,5 +272,53 @@ describe('useFetch', () => {
     expect(error).toBeDefined()
     expect(error).toEqual(mockError)
     expect(result).not.toBeDefined()
+  })
+
+  it('resets data when reset is called', async () => {
+    const { result: hook } = renderHook(() =>
+      useFetch<number, void>({
+        triggerOnLoad: false,
+        initialData: 123,
+        query: () => ({
+          url: MOCK_URL + 'data-reset',
+          errorResultType: 'json',
+        }),
+      }),
+    )
+
+    expect(hook.current.data).toBe(123)
+    
+    act(() => hook.current.reset())
+
+    expect(hook.current.data).not.toBeDefined()
+  })
+
+  it('resets error when reset is called', async () => {
+    const mockError = {
+      message: 'Not found',
+    }
+
+    fetchMock.mockResponseOnce(JSON.stringify(mockError), {
+      status: 404,
+    })
+
+    const { result: hook, waitForNextUpdate } = renderHook(() =>
+      useFetch<typeof mockError, void>({
+        query: () => ({
+          url: MOCK_URL + 'error-reset',
+          errorResultType: 'json',
+        }),
+      }),
+    )
+
+    await waitForNextUpdate()
+
+    expect(hook.current.data).not.toBeDefined()
+    expect(hook.current.error).toEqual(mockError)
+    
+    act(() => hook.current.reset())
+
+    expect(hook.current.data).not.toBeDefined()
+    expect(hook.current.error).not.toBeDefined()
   })
 })

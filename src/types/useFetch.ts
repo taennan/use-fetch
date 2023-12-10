@@ -5,8 +5,9 @@ export type ResultType = 'text' | 'json'
 export type UseFetchArgsResultType = ResultType | 'infer'
 
 export type TransformRequestHeadersFn = (headers?: RequestHeaders) => RequestHeaders
-export type TransformRequestParamsFn = (params?: RequestParams) => RequestParams
 export type TransformRequestBodyFn = (body?: RequestBody) => RequestBody
+export type TransformRequestParamsFn = (params?: RequestParams) => RequestParams
+export type TransformRequestUrlFn = (url: string) => string
 export type TransformRequestFn = (request: Request) => Request
 export type TransformResponseFn = (response: Response) => Response
 export type TransformResultFn = (result?: any) => any
@@ -51,8 +52,9 @@ export interface UseFetchArgs<Result, QueryArgs> {
   triggerOnQueryArgsChange?: boolean
   fetcher?: FetcherFn<Result>
   transformRequestHeaders?: TransformRequestHeadersFn
-  transformRequestParams?: TransformRequestParamsFn
   transformRequestBody?: TransformRequestBodyFn
+  transformRequestParams?: TransformRequestParamsFn
+  transformRequestUrl?: TransformRequestUrlFn
   transformRequest?: TransformRequestFn
   transformResponse?: TransformResponseFn
   transformResult?: TransformResultFn
@@ -65,6 +67,7 @@ export interface UseFetchReturn<Result, QueryArgs> {
   loading: boolean
   fetched: boolean
   trigger: UseFetchTriggerFn<Result, QueryArgs>
+  reset: () => void
 }
 
 export type UseFetchTriggerReturn<Result> =

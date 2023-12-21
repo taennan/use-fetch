@@ -4,11 +4,16 @@ export default {
   input: 'src/index.ts',
   output: [
     {
-      file: 'dist/index.js',
+      file: 'dist/es/index.js',
       format: 'es',
       exports: 'named',
-      sourcemap: true,
-      strict: false
+      sourcemap: true
+    },
+    {
+      file: 'dist/cjs/index.cjs',
+      format: 'cjs',
+      exports: 'named',
+      sourcemap: true
     }
   ],
   plugins: [

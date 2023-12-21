@@ -32,7 +32,7 @@
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@testing-library/react-hooks": "^8.0.1",
+    "@testing-library/react": "^14.1.2",
     "@types/jest": "^29.5.5",
     "@types/react": "^18.2.23",
     "@types/react-dom": "^18.2.8",
@@ -48,7 +48,7 @@
     "rollup-plugin-typescript2": "^0.36.0",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2",
-    "whatwg-fetch": "^3.6.19"
+    "whatwg-fetch": "^3.6.20"
   },
   "jest": {
     "moduleFileExtensions": [

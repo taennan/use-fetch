@@ -1,5 +1,5 @@
 import { enableFetchMocks } from 'jest-fetch-mock'
-import { act, renderHook } from '@testing-library/react-hooks'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import { useMemo } from 'react'
 import { useFetch } from '../hooks/useFetch'
 
@@ -20,19 +20,19 @@ describe('useFetch', () => {
     const mockResult = 'SUCCESS'
     fetchMock.mockResponseOnce(mockResult)
 
-    const { result: hook, waitForNextUpdate } = renderHook(() =>
-      useFetch({ 
+    const { result: hook } = renderHook(() =>
+      useFetch({
         query: () => ({
-          url: MOCK_URL + 'data'
-        })
+          url: MOCK_URL + 'data',
+        }),
       }),
     )
 
-    await waitForNextUpdate()
-
-    expect(hook.current.data).toBeDefined()
-    expect(hook.current.data).toBe(mockResult)
-    expect(hook.current.error).not.toBeDefined()
+    await waitFor(() => {
+      expect(hook.current.data).toBeDefined()
+      expect(hook.current.data).toBe(mockResult)
+      expect(hook.current.error).not.toBeDefined()
+    })
   })
 
   it('sets error on unsuccessful fetch', async () => {
@@ -44,33 +44,33 @@ describe('useFetch', () => {
       status: 404,
     })
 
-    const { result: hook, waitForNextUpdate } = renderHook(() =>
-      useFetch({ 
+    const { result: hook } = renderHook(() =>
+      useFetch({
         query: () => ({
-          url: MOCK_URL + 'error', 
+          url: MOCK_URL + 'error',
           errorResultType: 'json',
-        })
-       }),
+        }),
+      }),
     )
 
-    await waitForNextUpdate()
-
-    expect(hook.current.data).not.toBeDefined()
-    expect(hook.current.error).toBeDefined()
-    expect(hook.current.error).toEqual(mockError)
+    await waitFor(() => {
+      expect(hook.current.data).not.toBeDefined()
+      expect(hook.current.error).toBeDefined()
+      expect(hook.current.error).toEqual(mockError)
+    })
   })
 
   it('will not immediately trigger if triggerOnLoad === false', async () => {
     const mockResult = 'SUCCESS'
     fetchMock.mockResponseOnce(mockResult)
 
-    const { result: hook, waitForNextUpdate } = renderHook(() =>
-      useFetch<any, void>({ 
+    const { result: hook } = renderHook(() =>
+      useFetch<any, void>({
         triggerOnLoad: false,
         query: () => ({
           url: MOCK_URL + 'no-trigger-on-load',
         }),
-       }),
+      }),
     )
 
     expect(hook.current.data).not.toBeDefined()
@@ -81,18 +81,18 @@ describe('useFetch', () => {
       hook.current.trigger()
     })
 
-    await waitForNextUpdate()
-
-    expect(hook.current.data).toBeDefined()
-    expect(hook.current.data).toBe(mockResult)
-    expect(hook.current.error).not.toBeDefined()
+    await waitFor(() => {
+      expect(hook.current.data).toBeDefined()
+      expect(hook.current.data).toBe(mockResult)
+      expect(hook.current.error).not.toBeDefined()
+    })
   })
 
   it('triggers a fetch on query args change', async () => {
     let triggerCount: number = 0
     let queryArgs = { num: 7 }
     const getResult = (n: number) => ({
-      message: `Number is ${n}`
+      message: `Number is ${n}`,
     })
 
     fetchMock.mockResponse(async (req) => {
@@ -101,11 +101,7 @@ describe('useFetch', () => {
       return JSON.stringify(getResult(num))
     })
 
-    const {
-      result: hook,
-      rerender,
-      waitForNextUpdate,
-    } = renderHook(() =>
+    const { result: hook, rerender } = renderHook(() =>
       useFetch({
         triggerOnLoad: false,
         queryArgs,
@@ -114,7 +110,7 @@ describe('useFetch', () => {
           method: 'POST',
           resultType: 'json',
           body: args,
-        })
+        }),
       }),
     )
 
@@ -126,13 +122,13 @@ describe('useFetch', () => {
     queryArgs = { num: 117 }
     rerender()
 
-    await waitForNextUpdate()
-
-    expect(triggerCount).toEqual(1)
-    expect(hook.current.data).toBeDefined()
-    expect(hook.current.data).toEqual(getResult(queryArgs.num))
-    expect(hook.current.error).not.toBeDefined()
-    expect(hook.current.fetched).toBe(true)
+    await waitFor(() => {
+      expect(triggerCount).toEqual(1)
+      expect(hook.current.data).toBeDefined()
+      expect(hook.current.data).toEqual(getResult(queryArgs.num))
+      expect(hook.current.error).not.toBeDefined()
+      expect(hook.current.fetched).toBe(true)
+    })
   })
 
   it('does not trigger a fetch on change to triggerOnQueryArgsChange', async () => {
@@ -152,7 +148,7 @@ describe('useFetch', () => {
         queryArgs: memoHook.current,
         query: () => ({
           url: MOCK_URL + 'no-trigger-on-change-to-triggerOnQueryArgsChange',
-        })
+        }),
       }),
     )
 
@@ -164,10 +160,12 @@ describe('useFetch', () => {
     triggerOnQueryArgsChange = true
     rerender()
 
-    expect(triggerCount).toEqual(0)
-    expect(hook.current.data).not.toBeDefined()
-    expect(hook.current.error).not.toBeDefined()
-    expect(hook.current.fetched).toBe(false)
+    await waitFor(() => {
+      expect(triggerCount).toEqual(0)
+      expect(hook.current.data).not.toBeDefined()
+      expect(hook.current.error).not.toBeDefined()
+      expect(hook.current.fetched).toBe(false)
+    })
   })
 
   it('uses passed params in url', async () => {
@@ -184,16 +182,16 @@ describe('useFetch', () => {
       return 'SUCCESS'
     })
 
-    const { waitForNextUpdate } = renderHook(() =>
+    renderHook(() =>
       useFetch({
         query: () => ({
           url,
           params: urlParams,
-        })
+        }),
       }),
     )
 
-    await waitForNextUpdate()
+    await waitFor(() => {})
   })
 
   it('transforms body before sending request', async () => {
@@ -204,7 +202,7 @@ describe('useFetch', () => {
 
     fetchMock.mockResponseOnce(async (req) => req.text())
 
-    const { result: hook, waitForNextUpdate } = renderHook(() =>
+    const { result: hook } = renderHook(() =>
       useFetch({
         query: () => ({
           url: MOCK_URL + 'transform-request-body',
@@ -220,14 +218,14 @@ describe('useFetch', () => {
       }),
     )
 
-    await waitForNextUpdate()
-
-    expect(hook.current.data).toBeDefined()
-    expect(hook.current.data).toEqual({
-      A: mockBody.a,
-      B: mockBody.b,
+    await waitFor(() => {
+      expect(hook.current.data).toBeDefined()
+      expect(hook.current.data).toEqual({
+        A: mockBody.a,
+        B: mockBody.b,
+      })
+      expect(hook.current.error).not.toBeDefined()
     })
-    expect(hook.current.error).not.toBeDefined()
   })
 
   it('returns result from trigger function on successful request', async () => {
@@ -239,14 +237,16 @@ describe('useFetch', () => {
         triggerOnLoad: false,
         query: () => ({
           url: MOCK_URL + 'success-trigger',
-        })
+        }),
       }),
     )
-
-    const { error, result } = await hook.current.trigger()
-    expect(error).not.toBeDefined()
-    expect(result).toBeDefined()
-    expect(result).toEqual(mockResult)
+    
+    await act(async () => {
+      const { error, result } = await hook.current.trigger()
+      expect(error).not.toBeDefined()
+      expect(result).toBeDefined()
+      expect(result).toEqual(mockResult)
+    })
   })
 
   it('returns error from trigger function on unsuccessful request', async () => {
@@ -268,10 +268,12 @@ describe('useFetch', () => {
       }),
     )
 
-    const { error, result } = await hook.current.trigger()
-    expect(error).toBeDefined()
-    expect(error).toEqual(mockError)
-    expect(result).not.toBeDefined()
+    await act(async () => {
+      const { error, result } = await hook.current.trigger()
+      expect(error).toBeDefined()
+      expect(error).toEqual(mockError)
+      expect(result).not.toBeDefined()
+    })
   })
 
   it('resets data when reset is called', async () => {
@@ -287,7 +289,7 @@ describe('useFetch', () => {
     )
 
     expect(hook.current.data).toBe(123)
-    
+
     act(() => hook.current.reset())
 
     expect(hook.current.data).not.toBeDefined()
@@ -302,7 +304,7 @@ describe('useFetch', () => {
       status: 404,
     })
 
-    const { result: hook, waitForNextUpdate } = renderHook(() =>
+    const { result: hook } = renderHook(() =>
       useFetch<typeof mockError, void>({
         query: () => ({
           url: MOCK_URL + 'error-reset',
@@ -311,14 +313,16 @@ describe('useFetch', () => {
       }),
     )
 
-    await waitForNextUpdate()
+    await waitFor(() => {
+      expect(hook.current.data).not.toBeDefined()
+      expect(hook.current.error).toEqual(mockError)
+    })
 
-    expect(hook.current.data).not.toBeDefined()
-    expect(hook.current.error).toEqual(mockError)
-    
     act(() => hook.current.reset())
 
-    expect(hook.current.data).not.toBeDefined()
-    expect(hook.current.error).not.toBeDefined()
+    await waitFor(() => {
+      expect(hook.current.data).not.toBeDefined()
+      expect(hook.current.error).not.toBeDefined()
+    })
   })
 })

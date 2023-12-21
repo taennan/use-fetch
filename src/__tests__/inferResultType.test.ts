@@ -1,13 +1,12 @@
 import 'whatwg-fetch'
 import { inferResultType } from '../utils/inferResultType'
 
-const responseFromContentType = (contentType: string): Response => (
+const responseFromContentType = (contentType: string): Response =>
   new Response('', {
     headers: {
-      'content-type': contentType
-    }
+      'content-type': contentType,
+    },
   })
-)
 
 describe('inferResultType', () => {
   it('is defined', () => {
@@ -28,12 +27,12 @@ describe('inferResultType', () => {
       const response = responseFromContentType(contentType)
       const expected = 'text'
       const actual = inferResultType(response)
-  
+
       expect(actual).toBe(expected)
     }
   })
 
-  it("returns null when header content type cannot be inferred", () => {
+  it('returns null when header content type cannot be inferred', () => {
     const response = responseFromContentType('nonexistent-mime-type')
     const expected = null
     const actual = inferResultType(response)

@@ -65,19 +65,9 @@ As `useFetch` is designed to be as flexible as possible, it exposes many args wh
 It is recommended to wrap `useFetch` in a custom hook outside any component to keep it reusable and to only expose the necessary args inside components
 
 ```ts
-interface User {
-    id: number
-    email: string
-}
-
-interface SearchArgs {
-    id: number
-    email: string
-}
-
 // This hook can then be imported into a component and will run whenever `email` is changed
 const getUserByEmailQuery = (email: string) =>
-    useFetch<User | null, string>({
+    useFetch({
         queryArgs: email,
         query: (args) => ({
             url: 'http://my-api.com',
@@ -99,7 +89,7 @@ These can all be toggled using the following `boolean` args passed to the `useFe
 The following example will only automatically trigger a fetch when mounted, but not when `queryArgs` change
 
 ```ts
-const triggerToggleQuery = useFetch({
+const query = useFetch({
     ...options,
     triggerOnQueryArgsChange: false,
 })
@@ -111,15 +101,17 @@ The `useFetch` hook automatically infers whether to parse a response body as `te
 
 If `content-type` is '`application/json`', `response.json()` will be used to extract the response body, otherwise it will use `response.text()`
 
-To force the use of either `response.json()` or `response.text()` use the `resultType` and `errorResultType` options in the `useFetch` args
+To force the use of either `response.json()` or `response.text()` use the `resultType` and `errorResultType` options
 
 ```ts
-const resultTypeQuery = useFetch({
-    ...options,
-    // `resultType` is used for successful requests, `errorResultType` for unsuccessful ones
-    // Can be one of 'text', 'json' or 'infer'
-    // Using 'infer' results in the default behaviour
-    resultType: 'text',
-    errorResultType: 'json'
+const query = useFetch({
+    query: () => ({
+        url: '...',
+        // `resultType` is used for successful requests, `errorResultType` for unsuccessful ones
+        // Can be one of 'text', 'json' or 'infer'
+        // Using 'infer' results in the default behaviour
+        resultType: 'text',
+        errorResultType: 'json'
+    })
 })
 ```

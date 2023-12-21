@@ -49,10 +49,24 @@ As we have typed the hook with `CreateUserBody` as the second generic arg, any a
 If we do not need to pass an args to `query`, via `trigger`, we can type our hooks with `void`
 
 ```ts
-const noArgsQuery = useFetch<Result, void>({
+const query = useFetch<Result, void>({
     query: () => ({ url: '...' })
 })
 
 // Which will be triggered like this:
-await noArgsQuery.trigger()
+await query.trigger()
+```
+
+There may also be cases where we need to manually re-run the query with the current `queryArgs`, but do not want to have to pass the args to the `trigger` function
+
+In cases such as these, the `useFetch` hook returns a `retrigger` function which does exactly that
+
+```ts
+const query = useFetch({
+    queryArgs: 'some random args',
+    query: () => ({ url: '...' })
+})
+
+// No need to pass args to `trigger`, it will use the current value of `queryArgs`
+await query.retrigger()
 ```

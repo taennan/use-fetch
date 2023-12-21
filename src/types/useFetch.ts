@@ -68,6 +68,7 @@ export interface UseFetchReturn<Result, QueryArgs> {
   loading: boolean
   fetched: boolean
   trigger: UseFetchTriggerFn<Result, QueryArgs>
+  retrigger: () => UseFetchTriggerFnReturn<Result>
   reset: () => void
 }
 
@@ -81,9 +82,11 @@ export type UseFetchTriggerReturn<Result> =
       result: undefined
     }
 
+export type UseFetchTriggerFnReturn<Result> = Promise<UseFetchTriggerReturn<Result>>
+
 export type UseFetchTriggerFn<Result, QueryArgs> = (
   args: QueryArgs,
-) => Promise<UseFetchTriggerReturn<Result>>
+) => UseFetchTriggerFnReturn<Result>
 
 export type UseFetchHook<Result, QueryArgs> = (
   args: UseFetchArgs<Result, QueryArgs>,

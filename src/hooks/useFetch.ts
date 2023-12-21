@@ -129,6 +129,8 @@ export const useFetch = <Result, QueryArgs>(
     return result
   }
 
+  const forceTrigger = () => trigger(queryArgs as QueryArgs)
+
   const reset = () => {
     setData(undefined)
     setError(undefined)
@@ -139,7 +141,7 @@ export const useFetch = <Result, QueryArgs>(
       setInited(true)
       return
     }
-    trigger(queryArgs as QueryArgs)
+    forceTrigger()
     setInited(true)
   }, [])
 
@@ -154,6 +156,7 @@ export const useFetch = <Result, QueryArgs>(
     loading,
     fetched,
     trigger,
+    retrigger: forceTrigger,
     reset,
   }
 }

@@ -131,9 +131,16 @@ export const useFetch = <Result, QueryArgs>(
 
   const forceTrigger = () => trigger(queryArgs as QueryArgs)
 
-  const reset = () => {
+  const clear = () => {
     setData(undefined)
     setError(undefined)
+  }
+
+  const reset = () => {
+    setData(initialData)
+    setError(undefined)
+    setFetched(false)
+    setLoading(false)
   }
 
   useEffect(() => {
@@ -157,6 +164,7 @@ export const useFetch = <Result, QueryArgs>(
     fetched,
     trigger,
     retrigger: forceTrigger,
+    clear,
     reset,
   }
 }

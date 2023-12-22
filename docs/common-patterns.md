@@ -58,6 +58,74 @@ const QuoteOfTheDayComponent = () => {
 }
 ```
 
+## Setting initial data
+
+Use the `intitialData` option in `useFetch` to set the `data` returned by the hook before any fetches are made
+
+This is useful in SSR environments, as ordinarily, automatic fetches are made after the component has mounted __on the client side__
+
+```ts
+const { data, fetched } = useFetch({
+    initialData: 54,
+    triggerOnLoad: false,
+    query: () => ({
+        url: '...'
+    })
+})
+
+console.info(data === 54)        // -> true
+console.info(fetched === false)  // -> true
+```
+
+## Reset state
+
+Use the `clear` function returned from `useFetch` to set `data` and `error` to `undefined`
+
+```ts
+const { data, error, clear } = useFetch({
+    initialData: 'abcd',
+    query: () => ({
+        url: '...'
+    })
+})
+
+console.info(data === 'abcd')      // -> true
+
+clear()
+
+console.info(data === undefined)   // -> true
+console.info(error === undefined)  // -> true
+```
+
+The `clear` function only resets `data` and `error`. Properties like `fetched` and `loading` will remain unchanged
+
+To reset the hook to it's initial state (setting `fetched` and `loading` back to `false`), the `reset` function can be called
+
+Note that with `reset`, the `data` property will be set to the `initialData` passed to `useFetch` (if any)
+
+```ts
+const { data, fetched, trigger, reset } = useFetch({
+    initialData: 'abcd',
+    triggerOnLoad: false,
+    query: () => ({
+        url: '...'
+    })
+})
+
+console.info(data === 'abcd')    // -> true
+console.info(fetched === false)  // -> true
+
+await trigger()
+
+console.info(data === 'something-returned-from-fetch')  // -> true
+console.info(fetched === true)                          // -> true
+
+reset()
+
+console.info(data === undefined)  // -> true
+console.info(fetched === false)   // -> true
+```
+
 ## Declaring custom hooks outside components
 
 As `useFetch` is designed to be as flexible as possible, it exposes many args which are not always required in most cases

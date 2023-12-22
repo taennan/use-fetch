@@ -69,6 +69,7 @@ export interface UseFetchReturn<Result, QueryArgs> {
   fetched: boolean
   trigger: UseFetchTriggerFn<Result, QueryArgs>
   retrigger: () => UseFetchTriggerFnReturn<Result>
+  clear: () => void
   reset: () => void
 }
 

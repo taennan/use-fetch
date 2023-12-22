@@ -276,13 +276,13 @@ describe('useFetch', () => {
     })
   })
 
-  it('resets data when reset is called', async () => {
+  it('sets data to undefined when `clear` is called', async () => {
     const { result: hook } = renderHook(() =>
       useFetch<number, void>({
         triggerOnLoad: false,
         initialData: 123,
         query: () => ({
-          url: MOCK_URL + 'data-reset',
+          url: MOCK_URL + 'data-clear',
           errorResultType: 'json',
         }),
       }),
@@ -290,12 +290,12 @@ describe('useFetch', () => {
 
     expect(hook.current.data).toBe(123)
 
-    act(() => hook.current.reset())
+    act(hook.current.clear)
 
     expect(hook.current.data).not.toBeDefined()
   })
 
-  it('resets error when reset is called', async () => {
+  it('sets error to undefined when `clear` is called', async () => {
     const mockError = {
       message: 'Not found',
     }
@@ -307,7 +307,7 @@ describe('useFetch', () => {
     const { result: hook } = renderHook(() =>
       useFetch<typeof mockError, void>({
         query: () => ({
-          url: MOCK_URL + 'error-reset',
+          url: MOCK_URL + 'error-clear',
           errorResultType: 'json',
         }),
       }),
@@ -318,11 +318,45 @@ describe('useFetch', () => {
       expect(hook.current.error).toEqual(mockError)
     })
 
-    act(() => hook.current.reset())
+    act(hook.current.clear)
 
     await waitFor(() => {
       expect(hook.current.data).not.toBeDefined()
       expect(hook.current.error).not.toBeDefined()
+    })
+  })
+
+  it('resets to initial state when `reset` is called', async () => {
+    const initialData = '1234'
+    const responseData = 'abcd'
+
+    fetchMock.mockResponseOnce(responseData)
+
+    const { result: hook } = renderHook(() =>
+      useFetch<string, void>({
+        initialData,
+        triggerOnLoad: false,
+        query: () => ({
+          url: MOCK_URL + 'reset',
+        }),
+      }),
+    )
+
+    expect(hook.current.data).toBe(initialData)
+    expect(hook.current.fetched).toBe(false)
+
+    await act(hook.current.trigger)
+
+    await waitFor(() => {
+      expect(hook.current.data).toBe(responseData)
+      expect(hook.current.fetched).toBe(true)
+    })
+
+    act(hook.current.reset)
+
+    await waitFor(() => {
+      expect(hook.current.data).toBe(initialData)
+      expect(hook.current.fetched).toBe(false)
     })
   })
 })

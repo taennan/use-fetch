@@ -1,6 +1,6 @@
 {
   "name": "@helpful-hooks/use-fetch",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Helpful React hook for api calls",
   "main": "./dist/cjs/index.cjs",
   "module": "./dist/es/index.js",

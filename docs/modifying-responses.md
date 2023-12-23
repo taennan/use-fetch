@@ -1,6 +1,6 @@
 # Modifying Responses
 
-Responses received from api calls can be modified similar to how we are able to modify requests (see [here](docs-customizing-requests) for more info)
+Responses received from api calls can be modified similar to how we are able to modify requests (see [here](docs-customizing-requests) for more info on request transformation)
 
 Each transform function accepts the raw object to be modified and should return a new object with whatever changes you would like to have made to it
 

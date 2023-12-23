@@ -122,8 +122,8 @@ console.info(fetched === true)                          // -> true
 
 reset()
 
-console.info(data === undefined)  // -> true
-console.info(fetched === false)   // -> true
+console.info(data === 'abcd')    // -> true
+console.info(fetched === false)  // -> true
 ```
 
 ## Declaring custom hooks outside components

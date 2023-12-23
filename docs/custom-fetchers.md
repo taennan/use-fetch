@@ -41,7 +41,6 @@ const fetcher = async (args) => {
     const dataIsInCache = cacheHasDataForRequest(args)
     if (dataIsInCache) {
         const result = getDataFromCache(args)
-        // Here, we don't need to return a Response object, as we didn't actually make one
         return { result }
     } else {
         // ...make the fetch as in Example 1
